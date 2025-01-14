@@ -13,69 +13,31 @@
             margin: 0;
             padding: 20px;
         }
-
         h1 {
             font-size: 3rem;
             color: #FFD700;
             text-shadow: 0 0 10px #FFD700, 0 0 20px #FFD700;
-            margin-bottom: 10px;
         }
-
-        p {
-            font-size: 1.2rem;
-            color: #D3D3D3;
-            margin-bottom: 20px;
-        }
-
         .button {
-            display: inline-block;
             margin: 10px;
             padding: 15px 30px;
             font-size: 1.5rem;
             color: white;
             background: linear-gradient(45deg, #8B0000, #FF4500);
-            border: none;
             border-radius: 10px;
             cursor: pointer;
-            box-shadow: 0 0 15px rgba(255, 69, 0, 0.7);
-            transition: transform 0.3s ease, box-shadow 0.3s ease;
         }
-
-        .button:hover {
-            transform: scale(1.1);
-            box-shadow: 0 0 25px rgba(255, 69, 0, 1);
-        }
-
         .voting-area {
-            margin: 30px auto;
             display: flex;
             justify-content: center;
-            flex-wrap: wrap;
             gap: 20px;
+            flex-wrap: wrap;
         }
-
         #results {
-            margin-top: 30px;
-            padding: 20px;
-            background-color: rgba(0, 0, 0, 0.7);
-            border: 2px solid #FFD700;
-            border-radius: 10px;
-            box-shadow: 0 0 20px rgba(255, 215, 0, 0.8);
+            margin-top: 20px;
         }
-
-        ul {
-            list-style-type: none;
-            padding: 0;
-        }
-
         li {
-            font-size: 1.2rem;
-            margin: 5px 0;
             color: #FFD700;
-        }
-
-        button {
-            font-family: 'Garamond', serif;
         }
     </style>
     <script src="https://www.gstatic.com/firebasejs/9.15.0/firebase-app-compat.js"></script>
@@ -84,18 +46,13 @@
 <body>
     <h1>Vote Loup-Garou</h1>
     <p>Choisissez votre personnage préféré. Que la nuit commence !</p>
-
-    <div class="voting-area" id="voting-area">
-        <!-- Les boutons de vote seront générés ici -->
-    </div>
+    <div class="voting-area" id="voting-area"></div>
     <button class="button" onclick="submitVotes()">Soumettre les votes</button>
-
-    <div id="results" class="hidden">
+    <div id="results" style="display: none;">
         <h2>Résultats des Votes</h2>
         <ul id="results-list"></ul>
         <button class="button" onclick="resetPage()">Réinitialiser</button>
     </div>
-
     <script>
         // Configuration Firebase
         const firebaseConfig = {
@@ -108,60 +65,54 @@
             appId: "1:1093716528543:web:2e3d27666623975936c1aa"
         };
 
-        // Initialise Firebase
+        // Initialisation Firebase
         firebase.initializeApp(firebaseConfig);
         const database = firebase.database();
 
-        // Génère les boutons à partir de Firebase
-        function generateButtonsFromFirebase() {
-            const votesRef = database.ref('votes');
-            votesRef.once('value', (snapshot) => {
-                const votes = snapshot.val() || {};
-                const votingArea = document.getElementById('voting-area');
-                votingArea.innerHTML = ''; // Efface les anciens boutons
-
-                Object.keys(votes).forEach((key) => {
-                    const button = document.createElement('button');
-                    button.className = 'button';
-                    button.innerText = `Numéro ${key}\nVotes : ${votes[key]}`;
-                    button.onclick = () => vote(key);
-                    votingArea.appendChild(button);
-                });
-            });
+        // Génération des boutons
+        function generateButtons(votes = {}) {
+            const votingArea = document.getElementById('voting-area');
+            votingArea.innerHTML = '';
+            for (let i = 1; i <= 3; i++) {
+                const button = document.createElement('button');
+                button.className = 'button';
+                button.textContent = `Numéro ${i}\nVotes : ${votes[i] || 0}`;
+                button.onclick = () => vote(i);
+                votingArea.appendChild(button);
+            }
         }
 
-        // Fonction pour voter
+        // Voter
         function vote(number) {
-            const votesRef = database.ref(`votes/${number}`);
-            votesRef.set(firebase.database.ServerValue.increment(1));
-            alert(`Vote enregistré pour le numéro : ${number}`);
-            generateButtonsFromFirebase(); // Met à jour les boutons
+            const voteRef = database.ref(`votes/${number}`);
+            voteRef.set(firebase.database.ServerValue.increment(1))
+                .then(() => alert(`Vote enregistré pour le numéro ${number}`))
+                .catch(err => console.error("Erreur de vote :", err));
         }
 
-        // Soumet les votes et affiche les résultats
+        // Afficher les résultats
         function submitVotes() {
-            const resultsDiv = document.getElementById('results');
+            const results = document.getElementById('results');
             const resultsList = document.getElementById('results-list');
-            const votesRef = database.ref('votes');
-
-            votesRef.once('value', (snapshot) => {
+            database.ref('votes').once('value', (snapshot) => {
                 const votes = snapshot.val() || {};
                 resultsList.innerHTML = Object.entries(votes)
-                    .map(([number, count]) => `<li>Numéro ${number} : ${count} votes</li>`)
+                    .map(([key, value]) => `<li>Numéro ${key} : ${value} votes</li>`)
                     .join('');
-                resultsDiv.classList.remove('hidden');
+                results.style.display = 'block';
             });
         }
 
-        // Réinitialise la page
+        // Réinitialiser la page
         function resetPage() {
             location.reload();
         }
 
-        // Charge les boutons au chargement de la page
-        window.onload = function () {
-            generateButtonsFromFirebase();
-        };
+        // Écoute des votes
+        database.ref('votes').on('value', (snapshot) => {
+            const votes = snapshot.val() || {};
+            generateButtons(votes);
+        });
     </script>
 </body>
 </html>
