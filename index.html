@@ -39,9 +39,6 @@
         li {
             color: #FFD700;
         }
-        #footer {
-            margin-top: 50px;
-        }
     </style>
     <script src="https://www.gstatic.com/firebasejs/9.15.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.15.0/firebase-database-compat.js"></script>
@@ -49,11 +46,16 @@
 <body>
     <h1>Vote Loup-Garou</h1>
 
+    <!-- Ordre des votes -->
+    <div>
+        <h3>Ordre des votes :</h3>
+        <p id="vote-order">Aucun loup-garou ajouté pour le moment.</p>
+    </div>
+
     <!-- Zone de votes -->
     <div class="voting-area" id="voting-area"></div>
     <button class="button" onclick="submitVotes()">Soumettre les votes</button>
     <button class="button" onclick="resetVotes()">Réinitialiser les votes</button>
-    <button class="button" onclick="clearWerewolves()">Effacer les loups-garous</button>
 
     <!-- Résultats -->
     <div id="results" style="display: none;">
@@ -61,28 +63,20 @@
         <ul id="results-list"></ul>
     </div>
 
-    <!-- Section des loups-garous en bas -->
-    <div id="footer">
-        <!-- Ajout de loup-garous -->
-        <div>
-            <h3>Ajouter un Loup-Garou</h3>
-            <input type="number" id="add-werewolf-input" placeholder="Numéro du Loup-Garou">
-            <button class="button" onclick="addWerewolf()">Ajouter</button>
-        </div>
-        <div>
-            <button class="button" onclick="toggleWerewolfList()">Afficher/Masquer la liste des loups-garous</button>
-            <div id="werewolf-container" style="display: none;">
-                <h3>Liste des loups-garous :</h3>
-                <ul id="werewolf-list"></ul>
-            </div>
-        </div>
-
-        <!-- Ordre des votes -->
-        <div>
-            <h3>Ordre des votes :</h3>
-            <p id="vote-order">Aucun loup-garou ajouté pour le moment.</p>
+    <!-- Ajout de loup-garous -->
+    <div style="margin-top: 50px;">
+        <h3>Ajouter un Loup-Garou</h3>
+        <input type="number" id="add-werewolf-input" placeholder="Numéro du Loup-Garou">
+        <button class="button" onclick="addWerewolf()">Ajouter</button>
+    </div>
+    <div>
+        <button class="button" onclick="toggleWerewolfList()">Afficher/Masquer la liste des loups-garous</button>
+        <div id="werewolf-container" style="display: none;">
+            <h3>Liste des loups-garous :</h3>
+            <ul id="werewolf-list"></ul>
         </div>
     </div>
+    <button class="button" onclick="clearWerewolves()">Effacer les loups-garous</button>
 
     <script>
         // Configuration Firebase
@@ -199,12 +193,7 @@
                 const votes = snapshot.val() || {};
                 resultsList.innerHTML = Object.entries(votes)
                     .filter(([_, value]) => value > 0)
-                    .map(([key, value]) => {
-                        const voters = Object.entries(werewolfVotes)
-                            .filter(([_, v]) => v == key)
-                            .map(([w]) => w);
-                        return `<li>Numéro ${key} : ${value} votes (Loups-Garous : ${voters.join(', ')})</li>`;
-                    })
+                    .map(([key, value]) => `<li>Numéro ${key} : ${value} votes</li>`)
                     .join('');
                 results.style.display = 'block';
             });
