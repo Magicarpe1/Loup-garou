@@ -221,7 +221,7 @@
         function generateButtons(votes = {}) {
             const votingArea = document.getElementById('voting-area');
             votingArea.innerHTML = '';
-            for (let i = 1; i <= 60; i++) {
+            for (let i = 1; i <= 15; i++) {
                 const button = document.createElement('button');
                 button.className = 'voting-button';
                 button.textContent = `Numéro ${i}\nVotes : ${votes[i] || 0}`;
