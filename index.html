@@ -94,18 +94,18 @@
         firebase.initializeApp(firebaseConfig);
         const database = firebase.database();
 
-        let werewolves = []; // Liste des loups-garous
+        // Références Firebase
+        const werewolvesRef = database.ref('werewolves');
+        const votesRef = database.ref('votes');
+
         let werewolfVotes = {}; // Votes des loups-garous
 
         // Ajouter un loup-garou
         function addWerewolf() {
             const input = document.getElementById('add-werewolf-input');
             const number = parseInt(input.value);
-            if (number && !werewolves.includes(number)) {
-                werewolves.push(number);
-                werewolfVotes[number] = null; // Initialise les votes
-                updateWerewolfList();
-                updateVoteOrder();
+            if (number) {
+                werewolvesRef.child(number).set(true); // Ajouter le loup-garou dans Firebase
                 input.value = '';
             }
         }
@@ -116,25 +116,22 @@
             container.style.display = container.style.display === 'none' ? 'block' : 'none';
         }
 
-        // Mettre à jour la liste des loups-garous affichée
-        function updateWerewolfList() {
+        // Mettre à jour la liste des loups-garous
+        function updateWerewolfList(werewolves) {
             const list = document.getElementById('werewolf-list');
-            list.innerHTML = werewolves
+            const orderText = document.getElementById('vote-order');
+            const werewolfNumbers = Object.keys(werewolves).map(Number);
+
+            // Mettre à jour la liste
+            list.innerHTML = werewolfNumbers
                 .map(w => `<li>Loup-Garou ${w}</li>`)
                 .join('');
-        }
 
-        // Mettre à jour l'ordre des votes
-        function updateVoteOrder() {
-            const orderText = document.getElementById('vote-order');
-            if (werewolves.length > 0) {
-                const next = werewolves.find(w => werewolfVotes[w] === null);
-                orderText.textContent = next
-                    ? `Prochain loup-garou à voter : Loup-Garou ${next}`
-                    : 'Tous les loups-garous ont voté.';
-            } else {
-                orderText.textContent = 'Aucun loup-garou ajouté pour le moment.';
-            }
+            // Mettre à jour l'ordre des votes
+            const next = werewolfNumbers.find(w => !werewolfVotes[w]);
+            orderText.textContent = next
+                ? `Prochain loup-garou à voter : Loup-Garou ${next}`
+                : 'Tous les loups-garous ont voté.';
         }
 
         // Génération des boutons
@@ -152,14 +149,13 @@
 
         // Voter
         function vote(number) {
-            const next = werewolves.find(w => werewolfVotes[w] === null);
+            const next = Object.keys(werewolfVotes).find(w => !werewolfVotes[w]);
             if (next) {
                 werewolfVotes[next] = number;
-                const voteRef = database.ref(`votes/${number}`);
-                voteRef.set(firebase.database.ServerValue.increment(1))
+                votesRef.child(number).set(firebase.database.ServerValue.increment(1))
                     .then(() => {
                         alert(`Loup-Garou ${next} a voté pour le numéro ${number}`);
-                        updateVoteOrder();
+                        werewolvesRef.update(werewolfVotes);
                     })
                     .catch(err => console.error("Erreur de vote :", err));
             } else {
@@ -169,37 +165,30 @@
 
         // Réinitialiser les votes
         function resetVotes() {
-            const votesRef = database.ref('votes');
             const resetData = {};
             for (let i = 1; i <= 60; i++) {
                 resetData[i] = 0; // Réinitialise chaque vote à 0
             }
             votesRef.set(resetData)
-                .then(() => {
-                    alert('Partie réinitialisée !');
-                    werewolfVotes = {}; // Réinitialise les votes des loups-garous
-                    werewolves.forEach(w => (werewolfVotes[w] = null));
-                    updateVoteOrder();
-                })
+                .then(() => alert('Partie réinitialisée !'))
                 .catch((err) => console.error('Erreur lors de la réinitialisation :', err));
         }
 
         // Effacer les loups-garous
         function clearWerewolves() {
-            werewolves = [];
-            werewolfVotes = {};
-            updateWerewolfList();
-            updateVoteOrder();
+            werewolvesRef.remove()
+                .then(() => alert('Liste des loups-garous effacée.'))
+                .catch(err => console.error('Erreur lors de l’effacement :', err));
         }
 
         // Soumettre les votes
         function submitVotes() {
             const results = document.getElementById('results');
             const resultsList = document.getElementById('results-list');
-            database.ref('votes').once('value', (snapshot) => {
+            votesRef.once('value', (snapshot) => {
                 const votes = snapshot.val() || {};
                 resultsList.innerHTML = Object.entries(votes)
-                    .filter(([_, value]) => value > 0) // Exclure les votes à 0
+                    .filter(([_, value]) => value > 0)
                     .map(([key, value]) => {
                         const voters = Object.entries(werewolfVotes)
                             .filter(([_, v]) => v == key)
@@ -212,9 +201,16 @@
         }
 
         // Écoute des votes
-        database.ref('votes').on('value', (snapshot) => {
+        votesRef.on('value', (snapshot) => {
             const votes = snapshot.val() || {};
             generateButtons(votes);
+        });
+
+        // Écoute des loups-garous
+        werewolvesRef.on('value', (snapshot) => {
+            const werewolves = snapshot.val() || {};
+            werewolfVotes = {};
+            updateWerewolfList(werewolves);
         });
     </script>
 </body>
