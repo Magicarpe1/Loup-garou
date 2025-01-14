@@ -46,7 +46,8 @@
 
         h1 {
             font-size: 3rem;
-            color: #bf8013
+            color: #bf8013; /* Nouvelle couleur */
+            text-shadow: 0 0 10px #4b3621, 0 0 20px #bf8013; /* Optionnel : mettre à jour l'ombre aussi */
             position: relative;
             z-index: 1;
         }
@@ -242,7 +243,7 @@
                         // Met à jour visuellement le bouton sélectionné
                         const button = document.querySelector(`button[data-number="${number}"]`);
                         if (button) {
-                            button.style.opacity = "1.5"; // Réduire l'opacité
+                            button.style.opacity = "0.4"; // Réduire l'opacité
                         }
 
                         alert(`Loup-Garou ${nextWerewolf} a voté pour le numéro ${number} (${incrementValue} vote(s)).`);
@@ -273,7 +274,7 @@
                             // Réinitialiser les styles des boutons
                             const buttons = document.querySelectorAll('.voting-button');
                             buttons.forEach(button => {
-                                button.style.opacity = "1"; // Restaurer l'opacité normale
+                                button.style.opacity = "0.4"; // Restaurer l'opacité normale
                             });
                             alert('Votes réinitialisés et loups-garous prêts à revoter.');
                         })
