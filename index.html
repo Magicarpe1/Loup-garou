@@ -5,66 +5,106 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Vote Loup-Garou</title>
     <style>
+        @font-face {
+            font-family: "Bad Horse";
+            src: url("https://ik.imagekit.io/lakolo/CanisteDemo-Semibold.ttf?updatedAt=1736868528375") format("woff2");
+        }
+
         body {
-            font-family: 'Garamond', serif;
-            background-color: #121212;
-            color: #fff;
+            font-family: "Bad Horse", serif;
+            background: url("https://ik.imagekit.io/lakolo/3.jpg?updatedAt=1736868334601") no-repeat center center fixed;
+            background-size: cover;
+            color: #000;
             text-align: center;
             margin: 0;
             padding: 20px;
         }
+
         h1 {
             font-size: 3rem;
-            color: #FFD700;
-            text-shadow: 0 0 10px #FFD700, 0 0 20px #FFD700;
+            color: #4b3621;
+            text-shadow: 0 0 10px #4b3621;
         }
+
+        .logo {
+            animation: fadeIn 3s ease-in-out;
+            margin-bottom: 20px;
+        }
+
         .button {
             margin: 10px;
             padding: 15px 30px;
             font-size: 1.5rem;
-            color: white;
-            background: linear-gradient(45deg, #8B0000, #FF4500);
+            font-family: "Bad Horse", serif;
+            color: #4b3621;
+            background: url("https://ik.imagekit.io/lakolo/2.png?updatedAt=1736868306120"), url("https://ik.imagekit.io/lakolo/3.jpg?updatedAt=1736868334601");
+            background-size: 50px, cover;
+            background-repeat: no-repeat, no-repeat;
+            background-position: center, center;
+            opacity: 0.9;
             border-radius: 10px;
+            border: none;
+            box-shadow: 0 0 15px rgba(0, 0, 0, 0.3);
             cursor: pointer;
         }
+
+        .button:hover {
+            transform: scale(1.05);
+            opacity: 1;
+        }
+
+        .voting-button {
+            background: url("https://ik.imagekit.io/lakolo/3.jpg?updatedAt=1736868334601") no-repeat center center;
+            background-size: cover;
+            border: 2px solid #4b3621;
+            border-radius: 15px;
+            font-family: "Bad Horse", serif;
+            padding: 15px;
+            margin: 5px;
+            color: #4b3621;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        }
+
+        .voting-button:hover {
+            background: #4b3621;
+            color: #fff;
+        }
+
         .voting-area {
             display: flex;
             justify-content: center;
             gap: 20px;
             flex-wrap: wrap;
         }
+
         #results {
             margin-top: 20px;
         }
+
         li {
-            color: #FFD700;
+            color: #4b3621;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: scale(0.8);
+            }
+            to {
+                opacity: 1;
+                transform: scale(1);
+            }
         }
     </style>
-    <script src="https://www.gstatic.com/firebasejs/9.15.0/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.15.0/firebase-database-compat.js"></script>
 </head>
 <body>
+    <!-- Logo -->
+    <img src="https://ik.imagekit.io/lakolo/f7f31a21ecd1dca3.png?updatedAt=1736868023026" alt="Logo" class="logo" width="200">
+
     <h1>Vote Loup-Garou</h1>
 
-    <!-- Ordre des votes -->
-    <div>
-        <h3>Ordre des votes :</h3>
-        <p id="vote-order">Aucun loup-garou ajouté pour le moment.</p>
-    </div>
-
-    <!-- Zone de votes -->
-    <div class="voting-area" id="voting-area"></div>
-    <button class="button" onclick="submitVotes()">Soumettre les votes</button>
-    <button class="button" onclick="resetVotes()">Réinitialiser les votes</button>
-
-    <!-- Résultats -->
-    <div id="results" style="display: none;">
-        <h2>Résultats des Votes</h2>
-        <ul id="results-list"></ul>
-    </div>
-
     <!-- Ajout de loup-garous -->
-    <div style="margin-top: 50px;">
+    <div>
         <h3>Ajouter un Loup-Garou</h3>
         <input type="number" id="add-werewolf-input" placeholder="Numéro du Loup-Garou">
         <button class="button" onclick="addWerewolf()">Ajouter</button>
@@ -76,144 +116,27 @@
             <ul id="werewolf-list"></ul>
         </div>
     </div>
+
+    <!-- Ordre des votes -->
+    <div>
+        <h3>Ordre des votes :</h3>
+        <p id="vote-order">Aucun loup-garou ajouté pour le moment.</p>
+    </div>
+
+    <!-- Zone de votes -->
+    <div class="voting-area" id="voting-area"></div>
+    <button class="button" onclick="submitVotes()">Soumettre les votes</button>
+    <button class="button" onclick="resetVotes()">Réinitialiser les votes</button>
     <button class="button" onclick="clearWerewolves()">Effacer les loups-garous</button>
 
+    <!-- Résultats -->
+    <div id="results" style="display: none;">
+        <h2>Résultats des Votes</h2>
+        <ul id="results-list"></ul>
+    </div>
+
     <script>
-        // Configuration Firebase
-        const firebaseConfig = {
-            apiKey: "AIzaSyA2-e0dngn9BrksaAMEfXODLeiICmC0W6U",
-            authDomain: "votes-loup-garou.firebaseapp.com",
-            databaseURL: "https://votes-loup-garou-default-rtdb.europe-west1.firebasedatabase.app",
-            projectId: "votes-loup-garou",
-            storageBucket: "votes-loup-garou.firebasestorage.app",
-            messagingSenderId: "1093716528543",
-            appId: "1:1093716528543:web:2e3d27666623975936c1aa"
-        };
-
-        // Initialisation Firebase
-        firebase.initializeApp(firebaseConfig);
-        const database = firebase.database();
-
-        // Références Firebase
-        const werewolvesRef = database.ref('werewolves');
-        const votesRef = database.ref('votes');
-
-        let werewolfVotes = {}; // Votes des loups-garous
-
-        // Ajouter un loup-garou
-        function addWerewolf() {
-            const input = document.getElementById('add-werewolf-input');
-            const number = parseInt(input.value);
-            if (number) {
-                werewolvesRef.once('value', (snapshot) => {
-                    const werewolves = snapshot.val() || {};
-                    const isFirst = Object.keys(werewolves).length === 0; // Vérifier si c'est le premier loup-garou
-                    werewolvesRef.child(number).set({ voted: false, doubleVote: isFirst });
-                    input.value = '';
-                });
-            }
-        }
-
-        // Afficher/Masquer la liste des loups-garous
-        function toggleWerewolfList() {
-            const container = document.getElementById('werewolf-container');
-            container.style.display = container.style.display === 'none' ? 'block' : 'none';
-        }
-
-        // Mettre à jour la liste des loups-garous
-        function updateWerewolfList(werewolves) {
-            const list = document.getElementById('werewolf-list');
-            const orderText = document.getElementById('vote-order');
-            const werewolfNumbers = Object.keys(werewolves).filter(key => !werewolves[key].voted);
-
-            // Mettre à jour la liste
-            list.innerHTML = Object.keys(werewolves)
-                .map(w => `<li>Loup-Garou ${w}</li>`)
-                .join('');
-
-            // Mettre à jour l'ordre des votes
-            const next = werewolfNumbers[0];
-            orderText.textContent = next
-                ? `Prochain loup-garou à voter : Loup-Garou ${next}`
-                : 'Tous les loups-garous ont voté.';
-        }
-
-        // Génération des boutons
-        function generateButtons(votes = {}) {
-            const votingArea = document.getElementById('voting-area');
-            votingArea.innerHTML = '';
-            for (let i = 1; i <= 60; i++) { // Générer 60 boutons
-                const button = document.createElement('button');
-                button.className = 'button';
-                button.textContent = `Numéro ${i}\nVotes : ${votes[i] || 0}`;
-                button.onclick = () => vote(i);
-                votingArea.appendChild(button);
-            }
-        }
-
-        // Voter
-        function vote(number) {
-            werewolvesRef.once('value', snapshot => {
-                const werewolves = snapshot.val() || {};
-                const nextWerewolf = Object.keys(werewolves).find(w => !werewolves[w].voted);
-                if (nextWerewolf) {
-                    const isDoubleVote = werewolves[nextWerewolf].doubleVote;
-                    const incrementValue = isDoubleVote ? 2 : 1; // Double vote si nécessaire
-                    votesRef.child(number).set(firebase.database.ServerValue.increment(incrementValue))
-                        .then(() => {
-                            werewolvesRef.child(nextWerewolf).update({ voted: true });
-                            alert(`Loup-Garou ${nextWerewolf} a voté pour le numéro ${number} (${incrementValue} vote(s)).`);
-                        })
-                        .catch(err => console.error("Erreur de vote :", err));
-                } else {
-                    alert('Tous les loups-garous ont déjà voté.');
-                }
-            });
-        }
-
-        // Réinitialiser les votes
-        function resetVotes() {
-            const resetData = {};
-            for (let i = 1; i <= 60; i++) {
-                resetData[i] = 0; // Réinitialise chaque vote à 0
-            }
-            votesRef.set(resetData)
-                .then(() => alert('Votes réinitialisés.'))
-                .catch(err => console.error('Erreur lors de la réinitialisation :', err));
-        }
-
-        // Effacer les loups-garous
-        function clearWerewolves() {
-            werewolvesRef.remove()
-                .then(() => alert('Liste des loups-garous effacée.'))
-                .catch(err => console.error('Erreur lors de l’effacement :', err));
-        }
-
-        // Soumettre les votes
-        function submitVotes() {
-            const results = document.getElementById('results');
-            const resultsList = document.getElementById('results-list');
-            votesRef.once('value', (snapshot) => {
-                const votes = snapshot.val() || {};
-                resultsList.innerHTML = Object.entries(votes)
-                    .filter(([_, value]) => value > 0)
-                    .map(([key, value]) => `<li>Numéro ${key} : ${value} votes</li>`)
-                    .join('');
-                results.style.display = 'block';
-            });
-        }
-
-        // Écoute des votes
-        votesRef.on('value', snapshot => {
-            const votes = snapshot.val() || {};
-            generateButtons(votes);
-        });
-
-        // Écoute des loups-garous
-        werewolvesRef.on('value', snapshot => {
-            const werewolves = snapshot.val() || {};
-            updateWerewolfList(werewolves);
-        });
+        // Placez ici le script que nous avons configuré précédemment.
     </script>
 </body>
 </html>
