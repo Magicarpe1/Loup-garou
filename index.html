@@ -53,8 +53,11 @@
         <button class="button" onclick="addWerewolf()">Ajouter</button>
     </div>
     <div>
-        <h3>Liste des loups-garous :</h3>
-        <ul id="werewolf-list"></ul>
+        <button class="button" onclick="toggleWerewolfList()">Afficher/Masquer la liste des loups-garous</button>
+        <div id="werewolf-container" style="display: none;">
+            <h3>Liste des loups-garous :</h3>
+            <ul id="werewolf-list"></ul>
+        </div>
     </div>
 
     <!-- Ordre des votes -->
@@ -105,6 +108,12 @@
                 updateVoteOrder();
                 input.value = '';
             }
+        }
+
+        // Afficher/Masquer la liste des loups-garous
+        function toggleWerewolfList() {
+            const container = document.getElementById('werewolf-container');
+            container.style.display = container.style.display === 'none' ? 'block' : 'none';
         }
 
         // Mettre à jour la liste des loups-garous affichée
@@ -190,6 +199,7 @@
             database.ref('votes').once('value', (snapshot) => {
                 const votes = snapshot.val() || {};
                 resultsList.innerHTML = Object.entries(votes)
+                    .filter(([_, value]) => value > 0) // Exclure les votes à 0
                     .map(([key, value]) => {
                         const voters = Object.entries(werewolfVotes)
                             .filter(([_, v]) => v == key)
