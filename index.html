@@ -7,29 +7,41 @@
     <style>
         @font-face {
             font-family: "Bad Horse";
-            src: url("https://ik.imagekit.io/lakolo/badhorse.woff2"); /* Ajoute ici l'URL de ta police */
+            src: url("https://ik.imagekit.io/lakolo/badhorse.woff2"); /* Remplace par le lien de la police si nécessaire */
         }
 
         body {
             font-family: "Bad Horse", serif;
-            background: url("https://ik.imagekit.io/lakolo/2%20(1).png?updatedAt=1736868937754"), url("https://ik.imagekit.io/lakolo/3.jpg?updatedAt=1736868334601") no-repeat center center fixed;
+            background: url("https://ik.imagekit.io/lakolo/3.jpg?updatedAt=1736868334601") no-repeat center center fixed;
             background-size: cover;
             color: #4b3621;
             text-align: center;
             margin: 0;
             padding: 20px;
+            position: relative;
+        }
+
+        /* Image au-dessus du background */
+        #overlay {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            opacity: 0.3;
+            background: url("https://ik.imagekit.io/lakolo/2%20(1).png?updatedAt=1736868937754") no-repeat center;
+            background-size: contain;
+            width: 80%;
+            height: 80%;
+            z-index: 0;
+            pointer-events: none;
         }
 
         h1 {
             font-size: 3rem;
             color: #FFD700;
             text-shadow: 0 0 10px #4b3621, 0 0 20px #FFD700;
-        }
-
-        .logo {
-            margin: 20px auto;
-            width: 200px;
-            animation: fadeIn 3s ease-in-out;
+            position: relative;
+            z-index: 1;
         }
 
         .button {
@@ -37,15 +49,15 @@
             padding: 15px 30px;
             font-size: 1.2rem;
             color: #fff;
-            background: url("https://ik.imagekit.io/lakolo/3.jpg?updatedAt=1736868334601");
-            background-size: 50px, cover;
-            background-repeat: no-repeat, no-repeat;
-            background-position: center, center;
+            background: url("https://ik.imagekit.io/lakolo/3.jpg?updatedAt=1736868334601") no-repeat center center;
+            background-size: cover;
             border: none;
             border-radius: 10px;
             cursor: pointer;
             font-family: "Bad Horse", serif;
             box-shadow: 0 0 15px rgba(0, 0, 0, 0.3);
+            position: relative;
+            z-index: 1;
         }
 
         .button:hover {
@@ -58,6 +70,8 @@
             justify-content: center;
             gap: 20px;
             flex-wrap: wrap;
+            position: relative;
+            z-index: 1;
         }
 
         .voting-button {
@@ -71,6 +85,8 @@
             color: #4b3621;
             font-size: 1.2rem;
             box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            position: relative;
+            z-index: 1;
         }
 
         .voting-button:hover {
@@ -81,29 +97,23 @@
         #results {
             margin-top: 20px;
             font-family: "Bad Horse", serif;
+            position: relative;
+            z-index: 1;
         }
 
         li {
             color: #4b3621;
-        }
-
-        @keyframes fadeIn {
-            from {
-                opacity: 0;
-                transform: scale(0.8);
-            }
-            to {
-                opacity: 1;
-                transform: scale(1);
-            }
         }
     </style>
     <script src="https://www.gstatic.com/firebasejs/9.15.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.15.0/firebase-database-compat.js"></script>
 </head>
 <body>
+    <!-- Overlay au-dessus du background -->
+    <div id="overlay"></div>
+
     <!-- Logo -->
-    <img src="https://ik.imagekit.io/lakolo/f7f31a21ecd1dca3.png?updatedAt=1736868023026" alt="Logo" class="logo">
+    <img src="https://ik.imagekit.io/lakolo/f7f31a21ecd1dca3.png?updatedAt=1736868023026" alt="Logo" class="logo" style="margin: 20px auto; width: 200px; animation: fadeIn 3s ease-in-out;">
 
     <h1>Vote Loup-Garou</h1>
 
@@ -140,7 +150,7 @@
     <button class="button" onclick="clearWerewolves()">Effacer les loups-garous</button>
 
     <script>
-        // Reprise du script JavaScript sans modification.
+        // Script JavaScript inchangé avec double vote et gestion Firebase.
         const firebaseConfig = {
             apiKey: "AIzaSyA2-e0dngn9BrksaAMEfXODLeiICmC0W6U",
             authDomain: "votes-loup-garou.firebaseapp.com",
