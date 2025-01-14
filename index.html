@@ -105,8 +105,12 @@
             const input = document.getElementById('add-werewolf-input');
             const number = parseInt(input.value);
             if (number) {
-                werewolvesRef.child(number).set(false); // Ajouter le loup-garou dans Firebase
-                input.value = '';
+                werewolvesRef.once('value', (snapshot) => {
+                    const werewolves = snapshot.val() || {};
+                    const isFirst = Object.keys(werewolves).length === 0; // Vérifier si c'est le premier loup-garou
+                    werewolvesRef.child(number).set({ voted: false, doubleVote: isFirst });
+                    input.value = '';
+                });
             }
         }
 
@@ -120,7 +124,7 @@
         function updateWerewolfList(werewolves) {
             const list = document.getElementById('werewolf-list');
             const orderText = document.getElementById('vote-order');
-            const werewolfNumbers = Object.keys(werewolves).filter(key => werewolves[key] === false);
+            const werewolfNumbers = Object.keys(werewolves).filter(key => !werewolves[key].voted);
 
             // Mettre à jour la liste
             list.innerHTML = Object.keys(werewolves)
@@ -151,14 +155,14 @@
         function vote(number) {
             werewolvesRef.once('value', snapshot => {
                 const werewolves = snapshot.val() || {};
-                const nextWerewolf = Object.keys(werewolves).find(w => werewolves[w] === false);
+                const nextWerewolf = Object.keys(werewolves).find(w => !werewolves[w].voted);
                 if (nextWerewolf) {
-                    // Mettre à jour loup-garou comme ayant voté
-                    werewolvesRef.child(nextWerewolf).set(true);
-                    // Ajouter le vote
-                    votesRef.child(number).set(firebase.database.ServerValue.increment(1))
+                    const isDoubleVote = werewolves[nextWerewolf].doubleVote;
+                    const incrementValue = isDoubleVote ? 2 : 1; // Double vote si nécessaire
+                    votesRef.child(number).set(firebase.database.ServerValue.increment(incrementValue))
                         .then(() => {
-                            alert(`Loup-Garou ${nextWerewolf} a voté pour le numéro ${number}`);
+                            werewolvesRef.child(nextWerewolf).update({ voted: true });
+                            alert(`Loup-Garou ${nextWerewolf} a voté pour le numéro ${number} (${incrementValue} vote(s)).`);
                         })
                         .catch(err => console.error("Erreur de vote :", err));
                 } else {
