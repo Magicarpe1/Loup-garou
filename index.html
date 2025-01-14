@@ -78,9 +78,6 @@
             font-family: 'Garamond', serif;
         }
     </style>
-    <!-- Scripts Firebase -->
-    <script src="https://www.gstatic.com/firebasejs/9.15.0/firebase-app.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.15.0/firebase-database.js"></script>
 </head>
 <body>
     <h1>Vote Loup-Garou</h1>
@@ -93,7 +90,7 @@
 
     <div id="add-wolf-area">
         <h2>Ajouter un Loup-Garou</h2>
-        <input type="number" id="wolf-number" placeholder="Numéro du Loup-Garou" min="1" max="60" />
+        <input type="number" id="wolf-number" placeholder="Numéro du Loup-Garou" min="1" />
         <button class="button" onclick="addWolfFromInput()">Ajouter</button>
     </div>
 
@@ -109,38 +106,44 @@
     </div>
 
     <script>
-        // Configuration Firebase
-        const firebaseConfig = {
-            apiKey: "AIzaSyA2-e0dngn9BrksaAMEfXODLeiICmC0W6U",
-            authDomain: "votes-loup-garou.firebaseapp.com",
-            databaseURL: "https://votes-loup-garou-default-rtdb.europe-west1.firebasedatabase.app",
-            projectId: "votes-loup-garou",
-            storageBucket: "votes-loup-garou.firebasestorage.app",
-            messagingSenderId: "1093716528543",
-            appId: "1:1093716528543:web:2e3d27666623975936c1aa"
-        };
-
-        // Initialisation Firebase
-        const app = firebase.initializeApp(firebaseConfig);
-        const database = firebase.database(app);
-
+        // Variables globales
         const totalNumbers = 60; // Total de numéros pour voter
-        const votingArea = document.getElementById('voting-area'); // Zone de boutons
-        const votesRef = firebase.database().ref('votes'); // Référence Firebase
-
-        // Stocker les loups-garous
-        let wolves = [];
+        const wolves = []; // Liste des loups-garous
+        const votes = new Array(totalNumbers).fill(0); // Tableau pour stocker les votes
+        const votingArea = document.getElementById('voting-area');
 
         // Génère les boutons de vote
-        function generateButtons(votesFromDb = {}) {
+        function generateButtons() {
             votingArea.innerHTML = ''; // Efface les anciens boutons
             for (let i = 1; i <= totalNumbers; i++) {
                 const button = document.createElement('button');
-                button.innerText = `Numéro ${i}\nVotes : ${votesFromDb[i] || 0}`;
+                button.innerText = `Numéro ${i} Votes : ${votes[i - 1]}`;
                 button.className = 'button';
                 button.onclick = () => vote(i);
                 votingArea.appendChild(button);
             }
+        }
+
+        // Fonction de vote
+        function vote(number) {
+            votes[number - 1]++;
+            alert(`Vote enregistré pour le numéro : ${number}`);
+            generateButtons(); // Met à jour les boutons après le vote
+        }
+
+        // Soumet les votes et affiche les résultats
+        function submitVotes() {
+            const resultsDiv = document.getElementById('results');
+            const resultsList = document.getElementById('results-list');
+            resultsList.innerHTML = votes
+                .map((count, index) => `<li>Numéro ${index + 1} : ${count} votes ${wolves.includes(index + 1) ? '(Loup-Garou)' : ''}</li>`)
+                .join('');
+            resultsDiv.classList.remove('hidden');
+        }
+
+        // Réinitialise toute la page
+        function resetPage() {
+            location.reload();
         }
 
         // Ajouter un loup-garou depuis le formulaire
@@ -165,41 +168,6 @@
             wolvesList.innerHTML = wolves.map(wolf => `<li>Numéro ${wolf}</li>`).join('');
             document.getElementById('wolves-list').style.display = 'block';
         }
-
-        // Fonction de vote
-        function vote(number) {
-            const voteRef = firebase.database().ref(`votes/${number}`);
-            voteRef.set(firebase.database.ServerValue.increment(1));
-            alert(`Vote enregistré pour le numéro : ${number}`);
-        }
-
-        // Soumettre les votes et afficher les résultats avec les loups-garous
-        function submitVotes() {
-            const resultsDiv = document.getElementById('results');
-            const resultsList = document.getElementById('results-list');
-
-            votesRef.once('value', (snapshot) => {
-                const votes = snapshot.val() || {};
-                resultsList.innerHTML = Object.entries(votes)
-                    .map(([number, count]) => {
-                        const wolfMark = wolves.includes(parseInt(number)) ? " (Loup-Garou)" : "";
-                        return `<li>Numéro ${number} : ${count} votes${wolfMark}</li>`;
-                    })
-                    .join('');
-                resultsDiv.classList.remove('hidden');
-            });
-        }
-
-        // Réinitialise toute la page
-        function resetPage() {
-            location.reload();
-        }
-
-        // Écoute les changements de votes dans Firebase
-        votesRef.on('value', (snapshot) => {
-            const votes = snapshot.val() || {};
-            generateButtons(votes);
-        });
 
         // Génère les boutons au chargement de la page
         generateButtons();
