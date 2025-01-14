@@ -48,10 +48,11 @@
     <p>Choisissez votre personnage préféré. Que la nuit commence !</p>
     <div class="voting-area" id="voting-area"></div>
     <button class="button" onclick="submitVotes()">Soumettre les votes</button>
+    <button class="button" onclick="resetVotes()">Réinitialiser la partie</button>
     <div id="results" style="display: none;">
         <h2>Résultats des Votes</h2>
         <ul id="results-list"></ul>
-        <button class="button" onclick="resetPage()">Réinitialiser</button>
+        <button class="button" onclick="resetPage()">Réinitialiser la page</button>
     </div>
     <script>
         // Configuration Firebase
@@ -73,7 +74,7 @@
         function generateButtons(votes = {}) {
             const votingArea = document.getElementById('voting-area');
             votingArea.innerHTML = '';
-            for (let i = 1; i <= 3; i++) {
+            for (let i = 1; i <= 60; i++) { // Générer 60 boutons
                 const button = document.createElement('button');
                 button.className = 'button';
                 button.textContent = `Numéro ${i}\nVotes : ${votes[i] || 0}`;
@@ -88,6 +89,18 @@
             voteRef.set(firebase.database.ServerValue.increment(1))
                 .then(() => alert(`Vote enregistré pour le numéro ${number}`))
                 .catch(err => console.error("Erreur de vote :", err));
+        }
+
+        // Réinitialiser les votes
+        function resetVotes() {
+            const votesRef = database.ref('votes');
+            const resetData = {};
+            for (let i = 1; i <= 60; i++) {
+                resetData[i] = 0; // Réinitialise chaque vote à 0
+            }
+            votesRef.set(resetData)
+                .then(() => alert('Partie réinitialisée !'))
+                .catch((err) => console.error('Erreur lors de la réinitialisation :', err));
         }
 
         // Afficher les résultats
