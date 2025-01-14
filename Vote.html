@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vote Loup-Garou</title>
+    <style>
+        body {
+            font-family: 'Garamond', serif;
+            background-color: #121212;
+            color: #fff;
+            text-align: center;
+            margin: 0;
+            padding: 20px;
+        }
+
+        h1 {
+            font-size: 3rem;
+            color: #FFD700;
+            text-shadow: 0 0 10px #FFD700, 0 0 20px #FFD700;
+            margin-bottom: 10px;
+        }
+
+        p {
+            font-size: 1.2rem;
+            color: #D3D3D3;
+            margin-bottom: 20px;
+        }
+
+        .button {
+            display: inline-block;
+            margin: 10px;
+            padding: 15px 30px;
+            font-size: 1.5rem;
+            color: white;
+            background: linear-gradient(45deg, #8B0000, #FF4500);
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            box-shadow: 0 0 15px rgba(255, 69, 0, 0.7);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .button:hover {
+            transform: scale(1.1);
+            box-shadow: 0 0 25px rgba(255, 69, 0, 1);
+        }
+
+        .voting-area {
+            margin: 30px auto;
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 20px;
+        }
+
+        #results {
+            margin-top: 30px;
+            padding: 20px;
+            background-color: rgba(0, 0, 0, 0.7);
+            border: 2px solid #FFD700;
+            border-radius: 10px;
+            box-shadow: 0 0 20px rgba(255, 215, 0, 0.8);
+        }
+
+        ul {
+            list-style-type: none;
+            padding: 0;
+        }
+
+        li {
+            font-size: 1.2rem;
+            margin: 5px 0;
+            color: #FFD700;
+        }
+
+        button {
+            font-family: 'Garamond', serif;
+        }
+    </style>
+    <!-- Scripts Firebase -->
+    <script src="https://www.gstatic.com/firebasejs/9.15.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.15.0/firebase-database.js"></script>
+</head>
+<body>
+    <h1>Vote Loup-Garou</h1>
+    <p>Choisissez votre personnage préféré. Que la nuit commence !</p>
+
+    <div class="voting-area" id="voting-area">
+        <!-- Les boutons de vote seront générés ici -->
+    </div>
+    <button class="button" onclick="submitVotes()">Soumettre les votes</button>
+
+    <div id="results" class="hidden">
+        <h2>Résultats des Votes</h2>
+        <ul id="results-list"></ul>
+        <button class="button" onclick="resetPage()">Réinitialiser</button>
+    </div>
+
+    <script>
+        // Configuration Firebase
+        const firebaseConfig = {
+            apiKey: "AIzaSyA2-e0dngn9BrksaAMEfXODLeiICmC0W6U",
+            authDomain: "votes-loup-garou.firebaseapp.com",
+            databaseURL: "https://votes-loup-garou-default-rtdb.europe-west1.firebasedatabase.app",
+            projectId: "votes-loup-garou",
+            storageBucket: "votes-loup-garou.firebasestorage.app",
+            messagingSenderId: "1093716528543",
+            appId: "1:1093716528543:web:2e3d27666623975936c1aa"
+        };
+
+        // Initialisation Firebase
+        const app = firebase.initializeApp(firebaseConfig);
+        const database = firebase.database(app);
+
+        const totalNumbers = 3; // Total de numéros pour voter
+        const votingArea = document.getElementById('voting-area'); // Zone de boutons
+        const votesRef = firebase.database().ref('votes'); // Référence Firebase
+
+        // Génère les boutons de vote
+        function generateButtons(votesFromDb = {}) {
+            votingArea.innerHTML = ''; // Efface les anciens boutons
+            for (let i = 1; i <= totalNumbers; i++) {
+                const button = document.createElement('button');
+                button.innerText = `Numéro ${i}\nVotes : ${votesFromDb[i] || 0}`;
+                button.className = 'button';
+                button.onclick = () => vote(i);
+                votingArea.appendChild(button);
+            }
+        }
+
+        // Fonction de vote
+        function vote(number) {
+            const voteRef = firebase.database().ref(`votes/${number}`);
+            voteRef.set(firebase.database.ServerValue.increment(1));
+            alert(`Vote enregistré pour le numéro : ${number}`);
+        }
+
+        // Soumet les votes et affiche les résultats
+        function submitVotes() {
+            // Cache la zone de vote
+            votingArea.classList.add('hidden');
+
+            // Affiche les résultats
+            const resultsDiv = document.getElementById('results');
+            resultsDiv.classList.remove('hidden');
+        }
+
+        // Réinitialise toute la page
+        function resetPage() {
+            location.reload();
+        }
+
+        // Écoute les changements de votes dans Firebase
+        votesRef.on('value', (snapshot) => {
+            const votes = snapshot.val() || {};
+            generateButtons(votes);
+        });
+
+        // Génère les boutons au chargement de la page
+        generateButtons();
+    </script>
+</body>
+</html>
+
+
