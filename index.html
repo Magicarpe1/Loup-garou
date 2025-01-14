@@ -85,7 +85,7 @@
             for (let i = 1; i <= 60; i++) { // Générer 60 boutons
                 const button = document.createElement('button');
                 button.className = 'button';
-                button.textContent = `Numéro ${i}\nVotes : ${votes[i] || 0}`;
+                button.textContent = `Numéro ${i}\nVotes : ${votes[i]?.count || 0}`;
                 button.onclick = () => vote(i);
                 votingArea.appendChild(button);
             }
@@ -123,8 +123,10 @@
         function resetVotes() {
             database.ref('votes').set(null)
                 .then(() => {
-                    votes = {};
                     wolves = [];
+                    for (let i = 1; i <= 60; i++) {
+                        votes[i] = { count: 0, wolves: [] };
+                    }
                     alert('Partie réinitialisée !');
                     generateButtons();
                 })
@@ -136,6 +138,7 @@
             const results = document.getElementById('results');
             const resultsList = document.getElementById('results-list');
             resultsList.innerHTML = Object.entries(votes)
+                .filter(([key, value]) => value.count > 0)
                 .map(([key, value]) => 
                     `<li>Numéro ${key} : ${value.count} votes 
                      ${value.wolves.length ? `(Loups-Garous : ${value.wolves.join(', ')})` : ''}</li>`
