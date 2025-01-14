@@ -49,6 +49,11 @@
     <div class="voting-area" id="voting-area"></div>
     <button class="button" onclick="submitVotes()">Soumettre les votes</button>
     <button class="button" onclick="resetVotes()">Réinitialiser la partie</button>
+    <div>
+        <h2>Ajouter un Loup-Garou votant</h2>
+        <input type="number" id="wolf-number" placeholder="Numéro du Loup-Garou" min="1" max="60" />
+        <button class="button" onclick="addWolf()">Ajouter</button>
+    </div>
     <div id="results" style="display: none;">
         <h2>Résultats des Votes</h2>
         <ul id="results-list"></ul>
@@ -70,8 +75,11 @@
         firebase.initializeApp(firebaseConfig);
         const database = firebase.database();
 
+        let wolves = []; // Liste des loups-garous votants
+        const votes = {}; // Object pour stocker les votes
+
         // Génération des boutons
-        function generateButtons(votes = {}) {
+        function generateButtons() {
             const votingArea = document.getElementById('voting-area');
             votingArea.innerHTML = '';
             for (let i = 1; i <= 60; i++) { // Générer 60 boutons
@@ -83,44 +91,57 @@
             }
         }
 
+        // Ajouter un loup-garou votant
+        function addWolf() {
+            const wolfNumber = parseInt(document.getElementById('wolf-number').value, 10);
+            if (!isNaN(wolfNumber) && wolfNumber >= 1 && wolfNumber <= 60) {
+                if (!wolves.includes(wolfNumber)) {
+                    wolves.push(wolfNumber);
+                    alert(`Loup-Garou ajouté : Numéro ${wolfNumber}`);
+                } else {
+                    alert(`Le numéro ${wolfNumber} est déjà dans la liste des loups-garous.`);
+                }
+            } else {
+                alert("Veuillez entrer un numéro valide.");
+            }
+        }
+
         // Voter
         function vote(number) {
-            const voteRef = database.ref(`votes/${number}`);
-            voteRef.set(firebase.database.ServerValue.increment(1))
-                .then(() => alert(`Vote enregistré pour le numéro ${number}`))
-                .catch(err => console.error("Erreur de vote :", err));
+            if (!votes[number]) {
+                votes[number] = { count: 0, wolves: [] };
+            }
+            votes[number].count++;
+            if (wolves.includes(number)) {
+                votes[number].wolves.push(number);
+            }
+            alert(`Vote enregistré pour le numéro ${number}`);
+            generateButtons(); // Met à jour les boutons après le vote
         }
 
         // Réinitialiser les votes
         function resetVotes() {
-            const votesRef = database.ref('votes');
-            const resetData = {};
-            for (let i = 1; i <= 60; i++) {
-                resetData[i] = 0; // Réinitialise chaque vote à 0
-            }
-            votesRef.set(resetData)
+            database.ref('votes').set(null)
                 .then(() => {
+                    votes = {};
+                    wolves = [];
                     alert('Partie réinitialisée !');
-                    // Met à jour les boutons après la réinitialisation
-                    votesRef.once('value', (snapshot) => {
-                        const votes = snapshot.val() || {};
-                        generateButtons(votes);
-                    });
+                    generateButtons();
                 })
-                .catch((err) => console.error('Erreur lors de la réinitialisation :', err));
+                .catch(err => console.error("Erreur de réinitialisation :", err));
         }
 
         // Afficher les résultats
         function submitVotes() {
             const results = document.getElementById('results');
             const resultsList = document.getElementById('results-list');
-            database.ref('votes').once('value', (snapshot) => {
-                const votes = snapshot.val() || {};
-                resultsList.innerHTML = Object.entries(votes)
-                    .map(([key, value]) => `<li>Numéro ${key} : ${value} votes</li>`)
-                    .join('');
-                results.style.display = 'block';
-            });
+            resultsList.innerHTML = Object.entries(votes)
+                .map(([key, value]) => 
+                    `<li>Numéro ${key} : ${value.count} votes 
+                     ${value.wolves.length ? `(Loups-Garous : ${value.wolves.join(', ')})` : ''}</li>`
+                )
+                .join('');
+            results.style.display = 'block';
         }
 
         // Réinitialiser la page
@@ -128,11 +149,8 @@
             location.reload();
         }
 
-        // Écoute des votes
-        database.ref('votes').on('value', (snapshot) => {
-            const votes = snapshot.val() || {};
-            generateButtons(votes);
-        });
+        // Génère les boutons au chargement
+        generateButtons();
     </script>
 </body>
 </html>
