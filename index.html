@@ -7,14 +7,14 @@
     <style>
         @font-face {
             font-family: "Bad Horse";
-            src: url("https://ik.imagekit.io/lakolo/CanisteDemo-Semibold.ttf?updatedAt=1736868528375") format("woff2");
+            src: url("https://ik.imagekit.io/lakolo/badhorse.woff2"); /* Ajoute ici l'URL de ta police */
         }
 
         body {
             font-family: "Bad Horse", serif;
             background: url("https://ik.imagekit.io/lakolo/3.jpg?updatedAt=1736868334601") no-repeat center center fixed;
             background-size: cover;
-            color: #000;
+            color: #4b3621;
             text-align: center;
             margin: 0;
             padding: 20px;
@@ -22,52 +22,35 @@
 
         h1 {
             font-size: 3rem;
-            color: #4b3621;
-            text-shadow: 0 0 10px #4b3621;
+            color: #FFD700;
+            text-shadow: 0 0 10px #4b3621, 0 0 20px #FFD700;
         }
 
         .logo {
+            margin: 20px auto;
+            width: 200px;
             animation: fadeIn 3s ease-in-out;
-            margin-bottom: 20px;
         }
 
         .button {
             margin: 10px;
             padding: 15px 30px;
-            font-size: 1.5rem;
-            font-family: "Bad Horse", serif;
-            color: #4b3621;
+            font-size: 1.2rem;
+            color: #fff;
             background: url("https://ik.imagekit.io/lakolo/2.png?updatedAt=1736868306120"), url("https://ik.imagekit.io/lakolo/3.jpg?updatedAt=1736868334601");
             background-size: 50px, cover;
             background-repeat: no-repeat, no-repeat;
             background-position: center, center;
-            opacity: 0.9;
-            border-radius: 10px;
             border: none;
-            box-shadow: 0 0 15px rgba(0, 0, 0, 0.3);
+            border-radius: 10px;
             cursor: pointer;
+            font-family: "Bad Horse", serif;
+            box-shadow: 0 0 15px rgba(0, 0, 0, 0.3);
         }
 
         .button:hover {
             transform: scale(1.05);
-            opacity: 1;
-        }
-
-        .voting-button {
-            background: url("https://ik.imagekit.io/lakolo/3.jpg?updatedAt=1736868334601") no-repeat center center;
-            background-size: cover;
-            border: 2px solid #4b3621;
-            border-radius: 15px;
-            font-family: "Bad Horse", serif;
-            padding: 15px;
-            margin: 5px;
-            color: #4b3621;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-        }
-
-        .voting-button:hover {
-            background: #4b3621;
-            color: #fff;
+            background-color: rgba(75, 54, 33, 0.9);
         }
 
         .voting-area {
@@ -77,8 +60,27 @@
             flex-wrap: wrap;
         }
 
+        .voting-button {
+            background: url("https://ik.imagekit.io/lakolo/3.jpg?updatedAt=1736868334601") no-repeat center center;
+            background-size: cover;
+            border: 2px solid #4b3621;
+            border-radius: 15px;
+            font-family: "Bad Horse", serif;
+            padding: 10px 20px;
+            margin: 5px;
+            color: #4b3621;
+            font-size: 1.2rem;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        }
+
+        .voting-button:hover {
+            background-color: rgba(75, 54, 33, 0.9);
+            color: #fff;
+        }
+
         #results {
             margin-top: 20px;
+            font-family: "Bad Horse", serif;
         }
 
         li {
@@ -96,26 +98,14 @@
             }
         }
     </style>
+    <script src="https://www.gstatic.com/firebasejs/9.15.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.15.0/firebase-database-compat.js"></script>
 </head>
 <body>
     <!-- Logo -->
-    <img src="https://ik.imagekit.io/lakolo/f7f31a21ecd1dca3.png?updatedAt=1736868023026" alt="Logo" class="logo" width="200">
+    <img src="https://ik.imagekit.io/lakolo/f7f31a21ecd1dca3.png?updatedAt=1736868023026" alt="Logo" class="logo">
 
     <h1>Vote Loup-Garou</h1>
-
-    <!-- Ajout de loup-garous -->
-    <div>
-        <h3>Ajouter un Loup-Garou</h3>
-        <input type="number" id="add-werewolf-input" placeholder="Numéro du Loup-Garou">
-        <button class="button" onclick="addWerewolf()">Ajouter</button>
-    </div>
-    <div>
-        <button class="button" onclick="toggleWerewolfList()">Afficher/Masquer la liste des loups-garous</button>
-        <div id="werewolf-container" style="display: none;">
-            <h3>Liste des loups-garous :</h3>
-            <ul id="werewolf-list"></ul>
-        </div>
-    </div>
 
     <!-- Ordre des votes -->
     <div>
@@ -127,7 +117,6 @@
     <div class="voting-area" id="voting-area"></div>
     <button class="button" onclick="submitVotes()">Soumettre les votes</button>
     <button class="button" onclick="resetVotes()">Réinitialiser les votes</button>
-    <button class="button" onclick="clearWerewolves()">Effacer les loups-garous</button>
 
     <!-- Résultats -->
     <div id="results" style="display: none;">
@@ -135,8 +124,143 @@
         <ul id="results-list"></ul>
     </div>
 
+    <!-- Ajout de loup-garous -->
+    <div style="margin-top: 50px;">
+        <h3>Ajouter un Loup-Garou</h3>
+        <input type="number" id="add-werewolf-input" placeholder="Numéro du Loup-Garou">
+        <button class="button" onclick="addWerewolf()">Ajouter</button>
+    </div>
+    <div>
+        <button class="button" onclick="toggleWerewolfList()">Afficher/Masquer la liste des loups-garous</button>
+        <div id="werewolf-container" style="display: none;">
+            <h3>Liste des loups-garous :</h3>
+            <ul id="werewolf-list"></ul>
+        </div>
+    </div>
+    <button class="button" onclick="clearWerewolves()">Effacer les loups-garous</button>
+
     <script>
-        // Placez ici le script que nous avons configuré précédemment.
+        // Reprise du script JavaScript sans modification.
+        const firebaseConfig = {
+            apiKey: "AIzaSyA2-e0dngn9BrksaAMEfXODLeiICmC0W6U",
+            authDomain: "votes-loup-garou.firebaseapp.com",
+            databaseURL: "https://votes-loup-garou-default-rtdb.europe-west1.firebasedatabase.app",
+            projectId: "votes-loup-garou",
+            storageBucket: "votes-loup-garou.firebasestorage.app",
+            messagingSenderId: "1093716528543",
+            appId: "1:1093716528543:web:2e3d27666623975936c1aa"
+        };
+
+        firebase.initializeApp(firebaseConfig);
+        const database = firebase.database();
+
+        const werewolvesRef = database.ref('werewolves');
+        const votesRef = database.ref('votes');
+
+        let werewolfVotes = {};
+
+        function addWerewolf() {
+            const input = document.getElementById('add-werewolf-input');
+            const number = parseInt(input.value);
+            if (number) {
+                werewolvesRef.once('value', snapshot => {
+                    const werewolves = snapshot.val() || {};
+                    const isFirst = Object.keys(werewolves).length === 0;
+                    werewolvesRef.child(number).set({ voted: false, doubleVote: isFirst });
+                    input.value = '';
+                });
+            }
+        }
+
+        function toggleWerewolfList() {
+            const container = document.getElementById('werewolf-container');
+            container.style.display = container.style.display === 'none' ? 'block' : 'none';
+        }
+
+        function updateWerewolfList(werewolves) {
+            const list = document.getElementById('werewolf-list');
+            const orderText = document.getElementById('vote-order');
+            const werewolfNumbers = Object.keys(werewolves).filter(key => !werewolves[key].voted);
+
+            list.innerHTML = Object.keys(werewolves)
+                .map(w => `<li>Loup-Garou ${w}</li>`)
+                .join('');
+
+            const next = werewolfNumbers[0];
+            orderText.textContent = next
+                ? `Prochain loup-garou à voter : Loup-Garou ${next}`
+                : 'Tous les loups-garous ont voté.';
+        }
+
+        function generateButtons(votes = {}) {
+            const votingArea = document.getElementById('voting-area');
+            votingArea.innerHTML = '';
+            for (let i = 1; i <= 60; i++) {
+                const button = document.createElement('button');
+                button.className = 'voting-button';
+                button.textContent = `Numéro ${i}\nVotes : ${votes[i] || 0}`;
+                button.onclick = () => vote(i);
+                votingArea.appendChild(button);
+            }
+        }
+
+        function vote(number) {
+            werewolvesRef.once('value', snapshot => {
+                const werewolves = snapshot.val() || {};
+                const nextWerewolf = Object.keys(werewolves).find(w => !werewolves[w].voted);
+                if (nextWerewolf) {
+                    const isDoubleVote = werewolves[nextWerewolf].doubleVote;
+                    const incrementValue = isDoubleVote ? 2 : 1;
+                    votesRef.child(number).set(firebase.database.ServerValue.increment(incrementValue))
+                        .then(() => {
+                            werewolvesRef.child(nextWerewolf).update({ voted: true });
+                            alert(`Loup-Garou ${nextWerewolf} a voté pour le numéro ${number} (${incrementValue} vote(s)).`);
+                        })
+                        .catch(err => console.error("Erreur de vote :", err));
+                } else {
+                    alert('Tous les loups-garous ont déjà voté.');
+                }
+            });
+        }
+
+        function resetVotes() {
+            const resetData = {};
+            for (let i = 1; i <= 60; i++) {
+                resetData[i] = 0;
+            }
+            votesRef.set(resetData)
+                .then(() => alert('Votes réinitialisés.'))
+                .catch(err => console.error('Erreur lors de la réinitialisation :', err));
+        }
+
+        function clearWerewolves() {
+            werewolvesRef.remove()
+                .then(() => alert('Liste des loups-garous effacée.'))
+                .catch(err => console.error('Erreur lors de l’effacement :', err));
+        }
+
+        function submitVotes() {
+            const results = document.getElementById('results');
+            const resultsList = document.getElementById('results-list');
+            votesRef.once('value', snapshot => {
+                const votes = snapshot.val() || {};
+                resultsList.innerHTML = Object.entries(votes)
+                    .filter(([_, value]) => value > 0)
+                    .map(([key, value]) => `<li>Numéro ${key} : ${value} votes</li>`)
+                    .join('');
+                results.style.display = 'block';
+            });
+        }
+
+        votesRef.on('value', snapshot => {
+            const votes = snapshot.val() || {};
+            generateButtons(votes);
+        });
+
+        werewolvesRef.on('value', snapshot => {
+            const werewolves = snapshot.val() || {};
+            updateWerewolfList(werewolves);
+        });
     </script>
 </body>
 </html>
