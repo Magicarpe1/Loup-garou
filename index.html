@@ -222,7 +222,7 @@
             button.className = 'voting-button';
             button.setAttribute('data-number', i);
             button.textContent = `Numéro ${i}\nVotes : ${votes[i] || 0}`;
-            button.style.opacity = votes[i] > 0 ? "0.7" : "1"; // Fonce le bouton si voté
+            button.style.opacity = votes[i] > 0 ? "1.5" : "1"; // Fonce le bouton si voté
             button.onclick = () => vote(i);
             votingArea.appendChild(button);
         }
@@ -242,7 +242,7 @@
                         // Met à jour visuellement le bouton sélectionné
                         const button = document.querySelector(`button[data-number="${number}"]`);
                         if (button) {
-                            button.style.opacity = "0.7"; // Réduire l'opacité
+                            button.style.opacity = "1.5"; // Réduire l'opacité
                         }
 
                         alert(`Loup-Garou ${nextWerewolf} a voté pour le numéro ${number} (${incrementValue} vote(s)).`);
