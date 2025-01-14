@@ -112,8 +112,11 @@
                 votes[number] = { count: 0, wolves: [] };
             }
             votes[number].count++;
-            if (wolves.includes(number)) {
-                votes[number].wolves.push(number);
+            // Enregistre les votes des loups-garous dans l'ordre
+            for (const wolf of wolves) {
+                if (!votes[number].wolves.includes(wolf)) {
+                    votes[number].wolves.push(wolf);
+                }
             }
             alert(`Vote enregistré pour le numéro ${number}`);
             generateButtons(); // Met à jour les boutons après le vote
@@ -141,7 +144,7 @@
                 .filter(([key, value]) => value.count > 0)
                 .map(([key, value]) => 
                     `<li>Numéro ${key} : ${value.count} votes 
-                     ${value.wolves.length ? `(Loups-Garous : ${value.wolves.join(', ')})` : ''}</li>`
+                     ${value.wolves.length ? `(Loups-Garous : ${value.wolves.join(' -> ')})` : ''}</li>`
                 )
                 .join('');
             results.style.display = 'block';
