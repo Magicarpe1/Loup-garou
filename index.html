@@ -13,58 +13,99 @@
             margin: 0;
             padding: 20px;
         }
+
         h1 {
             font-size: 3rem;
             color: #FFD700;
             text-shadow: 0 0 10px #FFD700, 0 0 20px #FFD700;
+            margin-bottom: 10px;
         }
+
+        p {
+            font-size: 1.2rem;
+            color: #D3D3D3;
+            margin-bottom: 20px;
+        }
+
         .button {
+            display: inline-block;
             margin: 10px;
             padding: 15px 30px;
             font-size: 1.5rem;
             color: white;
             background: linear-gradient(45deg, #8B0000, #FF4500);
+            border: none;
             border-radius: 10px;
             cursor: pointer;
+            box-shadow: 0 0 15px rgba(255, 69, 0, 0.7);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
         }
+
+        .button:hover {
+            transform: scale(1.1);
+            box-shadow: 0 0 25px rgba(255, 69, 0, 1);
+        }
+
         .voting-area {
+            margin: 30px auto;
             display: flex;
             justify-content: center;
-            gap: 20px;
             flex-wrap: wrap;
+            gap: 20px;
         }
-        #results, #wolves-area {
-            margin-top: 20px;
+
+        #results {
+            margin-top: 30px;
             padding: 20px;
             background-color: rgba(0, 0, 0, 0.7);
-            border-radius: 10px;
             border: 2px solid #FFD700;
+            border-radius: 10px;
+            box-shadow: 0 0 20px rgba(255, 215, 0, 0.8);
         }
+
+        ul {
+            list-style-type: none;
+            padding: 0;
+        }
+
         li {
+            font-size: 1.2rem;
+            margin: 5px 0;
             color: #FFD700;
         }
+
+        button {
+            font-family: 'Garamond', serif;
+        }
     </style>
-    <script src="https://www.gstatic.com/firebasejs/9.15.0/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.15.0/firebase-database-compat.js"></script>
+    <!-- Scripts Firebase -->
+    <script src="https://www.gstatic.com/firebasejs/9.15.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.15.0/firebase-database.js"></script>
 </head>
 <body>
     <h1>Vote Loup-Garou</h1>
     <p>Choisissez votre personnage préféré. Que la nuit commence !</p>
 
-    <div class="voting-area" id="voting-area"></div>
+    <div class="voting-area" id="voting-area">
+        <!-- Les boutons de vote seront générés ici -->
+    </div>
     <button class="button" onclick="submitVotes()">Soumettre les votes</button>
-    <button class="button" onclick="resetVotes()">Réinitialiser la partie</button>
-    
-    <div id="results" style="display: none;">
-        <h2>Résultats des Votes</h2>
-        <ul id="results-list"></ul>
-        <button class="button" onclick="resetPage()">Réinitialiser la page</button>
+
+    <div id="add-wolf-area">
+        <h2>Ajouter un Loup-Garou</h2>
+        <input type="number" id="wolf-number" placeholder="Numéro du Loup-Garou" min="1" max="60" />
+        <button class="button" onclick="addWolfFromInput()">Ajouter</button>
     </div>
 
-    <!-- Section pour les loups-garous (visible uniquement par l'animateur) -->
-    <div id="wolves-area" style="display: none;">
-        <h2>Loups-Garous</h2>
-        <ul id="wolves-list"></ul>
+    <div id="wolves-list" style="display: none; margin-top: 20px;">
+        <h3>Loups-Garous Actuels</h3>
+        <ul id="wolves-display"></ul>
+    </div>
+
+    <div id="results" class="hidden">
+        <h2>Résultats des Votes</h2>
+        <ul id="results-list"></ul>
+        <button class="button" onclick="resetPage()">Réinitialiser</button>
     </div>
 
     <script>
@@ -80,95 +121,88 @@
         };
 
         // Initialisation Firebase
-        firebase.initializeApp(firebaseConfig);
-        const database = firebase.database();
+        const app = firebase.initializeApp(firebaseConfig);
+        const database = firebase.database(app);
 
-        const wolvesRef = database.ref('wolves'); // Référence Firebase pour les loups-garous
-        const votesRef = database.ref('votes');
+        const totalNumbers = 60; // Total de numéros pour voter
+        const votingArea = document.getElementById('voting-area'); // Zone de boutons
+        const votesRef = firebase.database().ref('votes'); // Référence Firebase
+
+        // Stocker les loups-garous
+        let wolves = [];
 
         // Génère les boutons de vote
-        function generateButtons(votes = {}) {
-            const votingArea = document.getElementById('voting-area');
-            votingArea.innerHTML = '';
-            for (let i = 1; i <= 60; i++) {
+        function generateButtons(votesFromDb = {}) {
+            votingArea.innerHTML = ''; // Efface les anciens boutons
+            for (let i = 1; i <= totalNumbers; i++) {
                 const button = document.createElement('button');
+                button.innerText = `Numéro ${i}\nVotes : ${votesFromDb[i] || 0}`;
                 button.className = 'button';
-                button.textContent = `Numéro ${i}\nVotes : ${votes[i] || 0}`;
                 button.onclick = () => vote(i);
                 votingArea.appendChild(button);
             }
         }
 
-        // Voter
-        function vote(number) {
-            const voteRef = database.ref(`votes/${number}`);
-            voteRef.set(firebase.database.ServerValue.increment(1))
-                .then(() => alert(`Vote enregistré pour le numéro ${number}`))
-                .catch(err => console.error("Erreur de vote :", err));
-        }
-
-        // Réinitialiser les votes
-        function resetVotes() {
-            const resetData = {};
-            for (let i = 1; i <= 60; i++) {
-                resetData[i] = 0; // Réinitialise chaque vote à 0
-            }
-            votesRef.set(resetData)
-                .then(() => alert('Partie réinitialisée !'))
-                .catch((err) => console.error('Erreur lors de la réinitialisation :', err));
-        }
-
-        // Ajouter des loups-garous
-        function addWolf(number) {
-            wolvesRef.once('value', (snapshot) => {
-                const wolves = snapshot.val() || [];
-                if (!wolves.includes(number)) {
-                    wolves.push(number); // Ajoute le numéro au tableau
-                    wolvesRef.set(wolves)
-                        .then(() => alert(`Numéro ${number} est maintenant un loup-garou !`))
-                        .catch(err => console.error('Erreur lors de l’ajout d’un loup-garou :', err));
+        // Ajouter un loup-garou depuis le formulaire
+        function addWolfFromInput() {
+            const wolfNumber = parseInt(document.getElementById('wolf-number').value, 10);
+            if (!isNaN(wolfNumber) && wolfNumber >= 1 && wolfNumber <= totalNumbers) {
+                if (!wolves.includes(wolfNumber)) {
+                    wolves.push(wolfNumber);
+                    updateWolvesDisplay();
+                    alert(`Le numéro ${wolfNumber} a été ajouté comme loup-garou.`);
+                } else {
+                    alert("Ce numéro est déjà un loup-garou !");
                 }
+            } else {
+                alert("Veuillez entrer un numéro valide.");
+            }
+        }
+
+        // Met à jour l'affichage des loups-garous
+        function updateWolvesDisplay() {
+            const wolvesList = document.getElementById('wolves-display');
+            wolvesList.innerHTML = wolves.map(wolf => `<li>Numéro ${wolf}</li>`).join('');
+            document.getElementById('wolves-list').style.display = 'block';
+        }
+
+        // Fonction de vote
+        function vote(number) {
+            const voteRef = firebase.database().ref(`votes/${number}`);
+            voteRef.set(firebase.database.ServerValue.increment(1));
+            alert(`Vote enregistré pour le numéro : ${number}`);
+        }
+
+        // Soumettre les votes et afficher les résultats avec les loups-garous
+        function submitVotes() {
+            const resultsDiv = document.getElementById('results');
+            const resultsList = document.getElementById('results-list');
+
+            votesRef.once('value', (snapshot) => {
+                const votes = snapshot.val() || {};
+                resultsList.innerHTML = Object.entries(votes)
+                    .map(([number, count]) => {
+                        const wolfMark = wolves.includes(parseInt(number)) ? " (Loup-Garou)" : "";
+                        return `<li>Numéro ${number} : ${count} votes${wolfMark}</li>`;
+                    })
+                    .join('');
+                resultsDiv.classList.remove('hidden');
             });
         }
 
-        // Afficher les loups-garous
-        function displayWolves(wolves = []) {
-            const wolvesArea = document.getElementById('wolves-area');
-            const wolvesList = document.getElementById('wolves-list');
-            wolvesList.innerHTML = wolves.map(wolf => `<li>Loup-Garou Numéro : ${wolf}</li>`).join('');
-            wolvesArea.style.display = 'block'; // Affiche la section pour l'animateur
+        // Réinitialise toute la page
+        function resetPage() {
+            location.reload();
         }
 
-        // Écoute des votes
+        // Écoute les changements de votes dans Firebase
         votesRef.on('value', (snapshot) => {
             const votes = snapshot.val() || {};
             generateButtons(votes);
         });
 
-        // Écoute des loups-garous
-        wolvesRef.on('value', (snapshot) => {
-            const wolves = snapshot.val() || [];
-            displayWolves(wolves);
-        });
-
-        // Soumettre les votes
-        function submitVotes() {
-            const resultsDiv = document.getElementById('results');
-            const resultsList = document.getElementById('results-list');
-            votesRef.once('value', (snapshot) => {
-                const votes = snapshot.val() || {};
-                resultsList.innerHTML = Object.entries(votes)
-                    .map(([key, value]) => `<li>Numéro ${key} : ${value} votes</li>`)
-                    .join('');
-                resultsDiv.style.display = 'block';
-            });
-        }
-
-        // Réinitialiser la page
-        function resetPage() {
-            location.reload();
-        }
+        // Génère les boutons au chargement de la page
+        generateButtons();
     </script>
 </body>
 </html>
-
