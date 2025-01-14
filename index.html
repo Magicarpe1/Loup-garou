@@ -78,9 +78,8 @@
             font-family: 'Garamond', serif;
         }
     </style>
-    <!-- Scripts Firebase -->
-    <script src="https://www.gstatic.com/firebasejs/9.15.0/firebase-app.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.15.0/firebase-database.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.15.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.15.0/firebase-database-compat.js"></script>
 </head>
 <body>
     <h1>Vote Loup-Garou</h1>
@@ -109,58 +108,60 @@
             appId: "1:1093716528543:web:2e3d27666623975936c1aa"
         };
 
-        // Initialisation Firebase
-        const app = firebase.initializeApp(firebaseConfig);
-        const database = firebase.database(app);
+        // Initialise Firebase
+        firebase.initializeApp(firebaseConfig);
+        const database = firebase.database();
 
-        const totalNumbers = 3; // Total de numéros pour voter
-        const votingArea = document.getElementById('voting-area'); // Zone de boutons
-        const votesRef = firebase.database().ref('votes'); // Référence Firebase
+        // Génère les boutons à partir de Firebase
+        function generateButtonsFromFirebase() {
+            const votesRef = database.ref('votes');
+            votesRef.once('value', (snapshot) => {
+                const votes = snapshot.val() || {};
+                const votingArea = document.getElementById('voting-area');
+                votingArea.innerHTML = ''; // Efface les anciens boutons
 
-        // Génère les boutons de vote
-        function generateButtons(votesFromDb = {}) {
-            votingArea.innerHTML = ''; // Efface les anciens boutons
-            for (let i = 1; i <= totalNumbers; i++) {
-                const button = document.createElement('button');
-                button.innerText = `Numéro ${i}\nVotes : ${votesFromDb[i] || 0}`;
-                button.className = 'button';
-                button.onclick = () => vote(i);
-                votingArea.appendChild(button);
-            }
+                Object.keys(votes).forEach((key) => {
+                    const button = document.createElement('button');
+                    button.className = 'button';
+                    button.innerText = `Numéro ${key}\nVotes : ${votes[key]}`;
+                    button.onclick = () => vote(key);
+                    votingArea.appendChild(button);
+                });
+            });
         }
 
-        // Fonction de vote
+        // Fonction pour voter
         function vote(number) {
-            const voteRef = firebase.database().ref(`votes/${number}`);
-            voteRef.set(firebase.database.ServerValue.increment(1));
+            const votesRef = database.ref(`votes/${number}`);
+            votesRef.set(firebase.database.ServerValue.increment(1));
             alert(`Vote enregistré pour le numéro : ${number}`);
+            generateButtonsFromFirebase(); // Met à jour les boutons
         }
 
         // Soumet les votes et affiche les résultats
         function submitVotes() {
-            // Cache la zone de vote
-            votingArea.classList.add('hidden');
-
-            // Affiche les résultats
             const resultsDiv = document.getElementById('results');
-            resultsDiv.classList.remove('hidden');
+            const resultsList = document.getElementById('results-list');
+            const votesRef = database.ref('votes');
+
+            votesRef.once('value', (snapshot) => {
+                const votes = snapshot.val() || {};
+                resultsList.innerHTML = Object.entries(votes)
+                    .map(([number, count]) => `<li>Numéro ${number} : ${count} votes</li>`)
+                    .join('');
+                resultsDiv.classList.remove('hidden');
+            });
         }
 
-        // Réinitialise toute la page
+        // Réinitialise la page
         function resetPage() {
             location.reload();
         }
 
-        // Écoute les changements de votes dans Firebase
-        votesRef.on('value', (snapshot) => {
-            const votes = snapshot.val() || {};
-            generateButtons(votes);
-        });
-
-        // Génère les boutons au chargement de la page
-        generateButtons();
+        // Charge les boutons au chargement de la page
+        window.onload = function () {
+            generateButtonsFromFirebase();
+        };
     </script>
 </body>
 </html>
-
-
