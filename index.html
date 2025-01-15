@@ -189,9 +189,15 @@
             werewolvesRef.once('value', snapshot => {
                 const werewolves = snapshot.val() || {};
                 const isFirst = Object.keys(werewolves).length === 0;
-                werewolvesRef.child(number).set({ voted: false, doubleVote: isFirst });
-                input.value = '';
+                werewolvesRef.child(number).set({ voted: false, doubleVote: isFirst })
+                    .then(() => {
+                        alert(`Loup-Garou ${number} ajouté.`);
+                        input.value = '';
+                    })
+                    .catch(err => console.error("Erreur lors de l'ajout du loup-garou :", err));
             });
+        } else {
+            alert('Veuillez entrer un numéro valide.');
         }
     }
 
@@ -199,6 +205,9 @@
     function selectWerewolf() {
         const dropdown = document.getElementById('werewolf-selector');
         selectedWerewolf = dropdown.value;
+        document.getElementById('selected-werewolf').textContent = selectedWerewolf
+            ? `Loup-Garou sélectionné : ${selectedWerewolf}`
+            : 'Aucun loup-garou sélectionné pour le moment.';
     }
 
     // Mettre à jour la liste des loups-garous
@@ -246,6 +255,7 @@
                         votesRef.child(`${number}_opacity`).set(0.4);
                         alert(`Loup-Garou ${selectedWerewolf} a voté pour le numéro ${number} (${incrementValue} vote(s)).`);
                         selectedWerewolf = null; // Réinitialise la sélection
+                        document.getElementById('selected-werewolf').textContent = 'Aucun loup-garou sélectionné pour le moment.';
                     })
                     .catch(err => console.error("Erreur de vote :", err));
             } else {
