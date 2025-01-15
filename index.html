@@ -315,11 +315,11 @@ setInterval(() => {
     floatingParticles.push(particle);
 
     // Limite le nombre de particules flottantes
-    if (floatingParticles.length > 150) { // Ajuste la limite si nécessaire
+    if (floatingParticles.length > 300) { // Ajuste la limite si nécessaire
         const removed = floatingParticles.shift();
         removed.remove();
     }
-}, 2); // Intervalle entre les particules aléatoires
+}, 1); // Intervalle entre les particules aléatoires
     // Configuration Firebase
     const firebaseConfig = {
         apiKey: "AIzaSyA2-e0dngn9BrksaAMEfXODLeiICmC0W6U",
