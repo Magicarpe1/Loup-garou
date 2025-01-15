@@ -234,7 +234,17 @@
 </body>
 
     <script>
-    const particlesContainer = document.getElementById('particles-container');
+    // Crée un conteneur dédié uniquement aux particules
+const particlesContainer = document.createElement('div');
+particlesContainer.id = 'particles-container';
+particlesContainer.style.position = 'absolute';
+particlesContainer.style.top = '0';
+particlesContainer.style.left = '0';
+particlesContainer.style.width = '100%';
+particlesContainer.style.height = '100%';
+particlesContainer.style.pointerEvents = 'none';
+particlesContainer.style.zIndex = '1'; // Met en arrière-plan des boutons
+document.body.appendChild(particlesContainer);
 
 // Crée une particule
 function createParticle(x, y, isFloating = false) {
@@ -278,7 +288,6 @@ function createParticle(x, y, isFloating = false) {
         onComplete: () => particle.remove()
     });
 
-    // Retourne l'élément particule pour un éventuel suivi de souris
     return particle;
 }
 
@@ -323,7 +332,20 @@ setInterval(() => {
         const removed = floatingParticles.shift();
         removed.remove();
     }
-}, 10); // Temps entre deux particules aléatoires (modifiable)
+}, 100); // Temps entre deux particules aléatoires (modifiable)
+
+// Ajuster la vitesse des particules aléatoires
+const randomParticleSpeed = 2; // Vitesse ajustable
+floatingParticles.forEach((particle) => {
+    gsap.to(particle, {
+        x: (Math.random() - 0.5) * 100 * randomParticleSpeed,
+        y: (Math.random() - 0.5) * 100 * randomParticleSpeed,
+        duration: Math.random() * 3 + 2,
+        repeat: -1,
+        yoyo: true,
+        ease: 'power1.inOut',
+    });
+});
 
 // Vitesse ajustable pour les particules aléatoires
 const randomParticleSpeed = 2; // Vitesse ajustable
