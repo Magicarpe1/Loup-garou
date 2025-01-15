@@ -169,23 +169,22 @@
             color: #4b3621;
         }
 
-        /* Particles.js Container */
-        #particles-js {
+        #particles-container {
             position: absolute;
-            width: 100%;
-            height: 100%;
             top: 0;
             left: 0;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
             z-index: -1; /* Derrière tout le contenu */
-            background: transparent;
         }
     </style>
     <script src="https://www.gstatic.com/firebasejs/9.15.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.15.0/firebase-database-compat.js"></script>
-    <script src="https://cdn.jsdelivr.net/particles.js/2.0.0/particles.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
 </head>
 <body>
-    <div id="particles-js"></div>
+    <div id="particles-container"></div>
     <!-- Overlay au-dessus du background -->
     <div id="overlay"></div>
 
@@ -233,44 +232,48 @@
 </body>
 
     <script>
-    particlesJS("particles-js", {
-            particles: {
-                number: {
-                    value: 80,
-                    density: { enable: true, value_area: 800 }
-                },
-                color: { value: "#ffffff" },
-                shape: { type: "circle" },
-                opacity: { value: 0.5, random: false },
-                size: { value: 3, random: true },
-                line_linked: {
-                    enable: true,
-                    distance: 150,
-                    color: "#ffffff",
-                    opacity: 0.4,
-                    width: 1
-                },
-                move: {
-                    enable: true,
-                    speed: 6,
-                    direction: "none",
-                    out_mode: "out",
-                }
-            },
-            interactivity: {
-                detect_on: "canvas",
-                events: {
-                    onhover: { enable: true, mode: "repulse" },
-                    onclick: { enable: true, mode: "push" }
-                },
-                modes: {
-                    grab: { distance: 400, line_linked: { opacity: 1 } },
-                    bubble: { distance: 400, size: 40, duration: 2, opacity: 8, speed: 3 },
-                    repulse: { distance: 200, duration: 0.4 },
-                    push: { particles_nb: 4 }
-                }
-            },
-            retina_detect: true
+    const particlesContainer = document.getElementById('particles-container');
+
+        // Crée une particule
+        function createParticle(x, y) {
+            const particle = document.createElement('div');
+            particle.className = 'particle';
+            particle.style.position = 'absolute';
+            particle.style.left = `${x}px`;
+            particle.style.top = `${y}px`;
+            particle.style.width = '10px';
+            particle.style.height = '10px';
+            particle.style.background = 'radial-gradient(circle, #b2884c, rgba(178, 136, 76, 0))';
+            particle.style.borderRadius = '50%';
+            particle.style.pointerEvents = 'none';
+            particle.style.opacity = 1;
+
+            particlesContainer.appendChild(particle);
+
+            // Animation de particule avec GSAP
+            gsap.to(particle, {
+                x: (Math.random() - 0.5) * 200,
+                y: (Math.random() - 0.5) * 200,
+                opacity: 0,
+                scale: Math.random() * 1.5 + 0.5,
+                duration: Math.random() * 2 + 1,
+                ease: 'power1.out',
+                onComplete: () => particle.remove()
+            });
+        }
+
+        // Ajoute les particules autour de la souris
+        document.addEventListener('mousemove', (event) => {
+            for (let i = 0; i < 3; i++) {
+                createParticle(event.clientX, event.clientY);
+            }
+        });
+
+        // Effet de clic pour explosion
+        document.addEventListener('click', (event) => {
+            for (let i = 0; i < 20; i++) {
+                createParticle(event.clientX, event.clientY);
+            }
         });
     // Configuration Firebase
     const firebaseConfig = {
