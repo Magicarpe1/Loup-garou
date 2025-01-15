@@ -200,6 +200,13 @@
     <div>
         <h3>À QUI LE TOUR :</h3>
     </div>
+    <div style="margin-top: 30px;">
+    <h3>Supprimer un Loup-Garou</h3>
+    <select id="remove-werewolf-dropdown">
+        <option value="">-- Sélectionnez un loup-garou --</option>
+    </select>
+    <button class="button" onclick="removeWerewolf()">Supprimer</button>
+    </div>
 
     <!-- Développeur -->
     <div id="developed-by">Developed by LA KOLO</div>
@@ -358,6 +365,38 @@ setInterval(() => {
             alert('Veuillez entrer un numéro valide.');
         }
     }
+    // Mettre à jour la liste déroulante pour la suppression des loups-garous
+    function updateRemoveWerewolfDropdown(werewolves) {
+        const removeDropdown = document.getElementById('remove-werewolf-dropdown');
+        removeDropdown.innerHTML = `<option value="">-- Sélectionnez un loup-garou --</option>`;
+        Object.keys(werewolves || {}).forEach(key => {
+            removeDropdown.innerHTML += `<option value="${key}">Loup-Garou ${key}</option>`;
+        });
+    }
+
+    // Supprimer un loup-garou
+    function removeWerewolf() {
+        const removeDropdown = document.getElementById('remove-werewolf-dropdown');
+        const werewolfToRemove = removeDropdown.value;
+
+        if (!werewolfToRemove) {
+            alert('Veuillez sélectionner un loup-garou à supprimer.');
+            return;
+        }
+
+        werewolvesRef.child(werewolfToRemove).remove()
+            .then(() => {
+                alert(`Loup-Garou ${werewolfToRemove} a été supprimé.`);
+                removeDropdown.value = '';
+            })
+            .catch(err => console.error("Erreur lors de la suppression du loup-garou :", err));
+    }
+
+    // Mettre à jour la liste des loups-garous
+    werewolvesRef.on('value', snapshot => {
+        const werewolves = snapshot.val() || {};
+        updateRemoveWerewolfDropdown(werewolves); // Met à jour la liste déroulante pour suppression
+    });
 
     // Mettre à jour la liste déroulante pour la sélection des loups-garous
     function updateWerewolfDropdown(werewolves) {
