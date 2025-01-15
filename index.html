@@ -249,7 +249,7 @@ function createParticle(x, y, isFloating = false) {
     particle.style.height = particle.style.width;
 
     // Couleur ajustable pour effet étoile brillante
-    particle.style.background = 'radial-gradient(circle, #b2884c, rgba(255, 255, 255, 0))'; // Couleur dorée brillante // Dégradé étoilé
+    particle.style.background = 'radial-gradient(circle, #b2884c, rgba(255, 255, 255, 0))'; // Couleur dorée brillante
     particle.style.borderRadius = '50%';
     particle.style.pointerEvents = 'none';
     particle.style.opacity = Math.random();
@@ -277,13 +277,29 @@ function createParticle(x, y, isFloating = false) {
         ease: 'power1.out',
         onComplete: () => particle.remove()
     });
+
+    // Retourne l'élément particule pour un éventuel suivi de souris
+    return particle;
 }
+
+// Stocke les particules aléatoires pour leur mouvement
+const floatingParticles = [];
 
 // Génération des particules au survol de la souris
 document.addEventListener('mousemove', (event) => {
     for (let i = 0; i < 15; i++) { // Modifier le nombre de particules ici
         createParticle(event.clientX, event.clientY);
     }
+
+    // Mouvement des particules flottantes vers la souris
+    floatingParticles.forEach((particle) => {
+        gsap.to(particle, {
+            x: `+=${(event.clientX - parseInt(particle.style.left, 10)) * 0.1}`, // Ajuste la force de l'attraction
+            y: `+=${(event.clientY - parseInt(particle.style.top, 10)) * 0.1}`,
+            duration: 0.5,
+            ease: 'power1.out',
+        });
+    });
 });
 
 // Génération d'explosion de particules au clic
@@ -297,8 +313,28 @@ document.addEventListener('click', (event) => {
 setInterval(() => {
     const x = Math.random() * window.innerWidth;
     const y = Math.random() * window.innerHeight;
-    createParticle(x, y, true);
+    const particle = createParticle(x, y, true);
+
+    // Ajoute la particule aux particules flottantes
+    floatingParticles.push(particle);
+
+    // Limite le nombre de particules flottantes pour éviter la surcharge
+    if (floatingParticles.length > 200) {
+        const removed = floatingParticles.shift();
+        removed.remove();
+    }
 }, 10); // Temps entre deux particules aléatoires (modifiable)
+
+// Vitesse ajustable pour les particules aléatoires
+const randomParticleSpeed = 2; // Vitesse ajustable
+floatingParticles.forEach((particle) => {
+    gsap.to(particle, {
+        x: (Math.random() - 0.5) * 100 * randomParticleSpeed,
+        y: (Math.random() - 0.5) * 100 * randomParticleSpeed,
+        duration: Math.random() * 3 + 2,
+        repeat: -1,
+        yoyo: true,
+        ease: 'power1.inOut',
     // Configuration Firebase
     const firebaseConfig = {
         apiKey: "AIzaSyA2-e0dngn9BrksaAMEfXODLeiICmC0W6U",
