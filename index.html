@@ -21,7 +21,7 @@
     top: 10px;
     right: 20px;
     font-family: "Bad Horse", serif;
-    font-size: 1.2rem;
+    font-size: 1.8rem;
     color: #b2884c;
     text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
     z-index: 100;
@@ -232,12 +232,16 @@
         const input = document.getElementById('add-werewolf-input');
         const number = parseInt(input.value);
         if (number && !isNaN(number)) {
-            werewolvesRef.child(number).set({ voted: false })
-                .then(() => {
-                    alert(`Loup-Garou ${number} ajouté !`);
-                    input.value = '';
-                })
-                .catch(err => console.error("Erreur lors de l'ajout du loup-garou :", err));
+            werewolvesRef.once('value', snapshot => {
+                const werewolves = snapshot.val() || {};
+                const isFirst = Object.keys(werewolves).length === 0; // Vérifier si c'est le premier loup-garou
+                werewolvesRef.child(number).set({ voted: false, doubleVote: isFirst })
+                    .then(() => {
+                        alert(`Loup-Garou ${number} ajouté avec ${isFirst ? '2 voix' : '1 voix'} !`);
+                        input.value = '';
+                    })
+                    .catch(err => console.error("Erreur lors de l'ajout du loup-garou :", err));
+            });
         } else {
             alert('Veuillez entrer un numéro valide.');
         }
@@ -256,12 +260,6 @@
     function handleWerewolfSelection() {
         const dropdown = document.getElementById('werewolf-dropdown');
         selectedWerewolf = dropdown.value;
-        const voteOrderText = document.getElementById('vote-order');
-        if (selectedWerewolf) {
-            voteOrderText.textContent = `Loup-Garou sélectionné : ${selectedWerewolf}`;
-        } else {
-            voteOrderText.textContent = 'Aucun loup-garou sélectionné pour le moment.';
-        }
     }
 
     // Générer les boutons de vote
@@ -288,21 +286,24 @@
 
         werewolvesRef.once('value', snapshot => {
             const werewolves = snapshot.val() || {};
-            if (!werewolves[selectedWerewolf]) {
+            const currentWerewolf = werewolves[selectedWerewolf];
+
+            if (!currentWerewolf) {
                 alert(`Loup-Garou ${selectedWerewolf} non trouvé.`);
                 return;
             }
 
-            if (werewolves[selectedWerewolf].voted) {
+            if (currentWerewolf.voted) {
                 alert(`Loup-Garou ${selectedWerewolf} a déjà voté.`);
                 return;
             }
 
-            votesRef.child(number).set(firebase.database.ServerValue.increment(1))
+            const incrementValue = currentWerewolf.doubleVote ? 2 : 1; // Double voix pour le premier loup-garou
+            votesRef.child(number).set(firebase.database.ServerValue.increment(incrementValue))
                 .then(() => {
                     werewolvesRef.child(selectedWerewolf).update({ voted: true });
                     votesRef.child(`${number}_opacity`).set(0.4);
-                    alert(`Loup-Garou ${selectedWerewolf} a voté pour le numéro ${number}.`);
+                    alert(`Loup-Garou ${selectedWerewolf} a voté pour le numéro ${number} (${incrementValue} voix).`);
                 })
                 .catch(err => console.error("Erreur lors du vote :", err));
         });
@@ -321,7 +322,7 @@
                     const werewolves = snapshot.val() || {};
                     const updatedWerewolves = {};
                     Object.keys(werewolves).forEach(key => {
-                        updatedWerewolves[key] = { ...werewolves[key], voted: false };
+                        updatedWerewolves[key] = { ...werewolves[key], voted: false }; // Conserver `doubleVote`
                     });
                     werewolvesRef.set(updatedWerewolves)
                         .then(() => alert('Votes réinitialisés et loups-garous prêts à revoter.'));
