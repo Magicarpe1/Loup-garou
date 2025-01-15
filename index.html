@@ -1,125 +1,148 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Vote Loup-Garou</title>
-    <style>
-        @font-face {
-            font-family: "Bad Horse";
-            src: url("https://ik.imagekit.io/lakolo/JMH%20Beda.ttf?updatedAt=1736878741238"); /* Remplace par le lien de la police si nécessaire */
-        }
+<style>
+    @font-face {
+        font-family: "Bad Horse";
+        src: url("https://ik.imagekit.io/lakolo/JMH%20Beda.ttf?updatedAt=1736878741238");
+    }
 
-        body {
-            font-family: "Bad Horse", serif;
-            background: url("https://ik.imagekit.io/lakolo/3.jpg?updatedAt=1736868334601") no-repeat center center fixed;
-            background-size: cover;
-            color: #4b3621;
-            text-align: center;
-            margin: 0;
-            padding: 20px;
-            position: relative;
-        }
-        
-        input[type="number"] {
+    body {
+        font-family: "Bad Horse", serif;
+        background: url("https://ik.imagekit.io/lakolo/3.jpg?updatedAt=1736868334601") no-repeat center center fixed;
+        background-size: cover;
+        color: #4b3621;
+        text-align: center;
+        margin: 0;
+        padding: 20px;
+        position: relative;
+    }
+
+    input[type="number"] {
         font-size: 1.5rem;
         padding: 10px;
         width: 200px;
         border: 2px solid #4b3621;
         border-radius: 5px;
-        }
-        
-        /* Image au-dessus du background */
-        #overlay {
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            opacity: 0.3;
-            background: url("https://ik.imagekit.io/lakolo/Loups-garous_de_Thiercelieux.png?updatedAt=1736870142041") no-repeat center;
-            background-size: contain;
-            width: 80%;
-            height: 80%;
-            z-index: 0;
-            pointer-events: none;
-        }
+    }
 
-        h1 {
-            font-size: 3rem;
-            color: #b2884c; /* Nouvelle couleur */
-            position: relative;
-            z-index: 1;
-        }
-        
-        h3 {
-            color: #b2884c !important;
-        }
+    /* Image au-dessus du background */
+    #overlay {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        opacity: 0.3;
+        background: url("https://ik.imagekit.io/lakolo/Loups-garous_de_Thiercelieux.png?updatedAt=1736870142041") no-repeat center;
+        background-size: contain;
+        width: 80%;
+        height: 80%;
+        z-index: 0;
+        pointer-events: none;
+    }
 
-        #vote-order {
-            color: #b2884c 
-        }
+    h1 {
+        font-size: 3rem;
+        color: #b2884c; /* Nouvelle couleur */
+        position: relative;
+        z-index: 1;
+    }
 
-        .button {
-            margin: 10px;
-            padding: 15px 30px;
-            font-size: 1.2rem;
-            color: #030202;
-            background: url("https://ik.imagekit.io/lakolo/3.jpg?updatedAt=1736868334601") no-repeat center center;
-            background-size: cover;
-            border: none;
-            border-radius: 10px;
-            cursor: pointer;
-            font-family: "Bad Horse", serif;
-            box-shadow: 0 0 15px rgba(0, 0, 0, 0.3);
-            position: relative;
-            z-index: 1;
-        }
+    h3 {
+        color: #b2884c !important;
+    }
 
-        .button:hover {
-            transform: scale(1.05);
-            background-color: rgba(75, 54, 33, 0.9);
-        }
+    #vote-order {
+        color: #b2884c;
+    }
 
-        .voting-area {
-            display: flex;
-            justify-content: center;
-            gap: 20px;
-            flex-wrap: wrap;
-            position: relative;
-            z-index: 1;
-        }
+    .button {
+        margin: 10px;
+        padding: 15px 30px;
+        font-size: 1.2rem;
+        color: #030202;
+        background: url("https://ik.imagekit.io/lakolo/3.jpg?updatedAt=1736868334601") no-repeat center center;
+        background-size: cover;
+        border: none;
+        border-radius: 10px;
+        cursor: pointer;
+        font-family: "Bad Horse", serif;
+        box-shadow: 0 0 15px rgba(0, 0, 0, 0.3);
+        position: relative;
+        z-index: 1;
+    }
 
-        .voting-button {
-            background: url("https://ik.imagekit.io/lakolo/3.jpg?updatedAt=1736868334601") no-repeat center center;
-            background-size: cover;
-            border: 2px solid #4b3621;
-            border-radius: 15px;
-            font-family: "Bad Horse", serif;
-            padding: 10px 20px;
-            margin: 5px;
-            color: #4b3621;
-            font-size: 1.2rem;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-            position: relative;
-            z-index: 1;
-        }
+    .button:hover {
+        transform: scale(1.05);
+        background-color: rgba(75, 54, 33, 0.9);
+    }
 
-        .voting-button:hover {
-            background-color: rgba(75, 54, 33, 0.9);
-            color: #fff;
-        }
+    .voting-area {
+        display: flex;
+        justify-content: center;
+        gap: 20px;
+        flex-wrap: wrap;
+        position: relative;
+        z-index: 1;
+    }
 
-        #results {
-            margin-top: 20px;
-            font-family: "Bad Horse", serif;
-            position: relative;
-            z-index: 1;
-        }
+    .voting-button {
+        background: url("https://ik.imagekit.io/lakolo/3.jpg?updatedAt=1736868334601") no-repeat center center;
+        background-size: cover;
+        border: 2px solid #4b3621;
+        border-radius: 15px;
+        font-family: "Bad Horse", serif;
+        padding: 10px 20px;
+        margin: 5px;
+        color: #4b3621;
+        font-size: 1.2rem;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        position: relative;
+        z-index: 1;
+    }
 
-        li {
-            color: #4b3621;
-        }
-    </style>
+    .voting-button:hover {
+        background-color: rgba(75, 54, 33, 0.9);
+        color: #fff;
+    }
+
+    #results {
+        margin-top: 20px;
+        font-family: "Bad Horse", serif;
+        position: relative;
+        z-index: 1;
+    }
+
+    li {
+        color: #4b3621;
+    }
+
+    /* Style pour la liste déroulante */
+    select {
+        font-family: "Bad Horse", serif;
+        font-size: 1.5rem;
+        padding: 15px;
+        width: 300px; /* Largeur augmentée */
+        border: 2px solid #4b3621;
+        border-radius: 8px;
+        background: #f3eac2; /* Couleur parchemin */
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        margin: 20px auto;
+        display: block;
+        cursor: pointer;
+        color: #4b3621;
+    }
+
+    select:focus {
+        outline: none;
+        border-color: #bf8013; /* Bordure dorée en focus */
+        box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3);
+    }
+
+    select option {
+        font-family: "Bad Horse", serif;
+        font-size: 1.2rem;
+        color: #4b3621;
+    }
+
+</style>
     <script src="https://www.gstatic.com/firebasejs/9.15.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.15.0/firebase-database-compat.js"></script>
 </head>
@@ -132,7 +155,6 @@
     <!-- Ordre des votes -->
     <div>
         <h3>À QUI LE TOUR :</h3>
-        <p id="vote-order">Aucun loup-garou ajouté pour le moment.</p>
     </div>
 
     <!-- Sélection du loup-garou -->
@@ -141,7 +163,6 @@
         <select id="werewolf-dropdown" onchange="handleWerewolfSelection()">
             <option value="">-- Sélectionnez un loup-garou --</option>
         </select>
-        <p id="vote-order">Aucun loup-garou sélectionné pour le moment.</p>
     </div>
 
     <!-- Zone de votes -->
@@ -160,13 +181,6 @@
         <h3>Ajouter un Loup-Garou</h3>
         <input type="number" id="add-werewolf-input" placeholder="Numéro du Loup-Garou">
         <button class="button" onclick="addWerewolf()">Ajouter</button>
-    </div>
-    <div>
-        <button class="button" onclick="toggleWerewolfList()">Afficher/Masquer la liste des loups-garous</button>
-        <div id="werewolf-container" style="display: none;">
-            <h3>Liste des loups-garous :</h3>
-            <ul id="werewolf-list"></ul>
-        </div>
     </div>
     <button class="button" onclick="clearWerewolves()">Effacer les loups-garous</button>
 </body>
