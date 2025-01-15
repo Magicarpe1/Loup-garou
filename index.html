@@ -190,6 +190,7 @@
     <div id="overlay"></div>
 
     <!-- Titre principal -->
+    <h1>QUE LA NUIT COMMENCE 🌓 !</h1>
     <h1>QUE LA NUIT COMMENCE 🌓 </h1>
     <!-- Texte descriptif -->
     <p style="font-family: 'Bad Horse', serif; color: #b2884c; font-size: 1.5rem; margin-top: 10px;">
@@ -240,11 +241,11 @@ function createParticle(x, y, isFloating = false) {
     const particle = document.createElement('div');
     particle.className = 'particle';
     particle.style.position = 'absolute';
-    particle.style.left = ${x}px;
-    particle.style.top = ${y}px;
+    particle.style.left = `${x}px`;
+    particle.style.top = `${y}px`;
 
     // Taille ajustable
-    particle.style.width = ${Math.random() * 6 + 3}px; // Taille entre 3px et 9px
+    particle.style.width = `${Math.random() * 6 + 3}px`; // Taille entre 3px et 9px
     particle.style.height = particle.style.width;
 
     // Couleur ajustable pour effet étoile brillante
