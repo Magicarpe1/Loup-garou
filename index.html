@@ -283,7 +283,7 @@
 
 // Génération des particules au survol de la souris
 document.addEventListener('mousemove', (event) => {
-    for (let i = 0; i < 15; i++) { // Nombre de particules à la souris
+    for (let i = 0; i < 7; i++) { // Nombre de particules à la souris
         createParticle(event.clientX, event.clientY);
     }
 
@@ -300,7 +300,7 @@ document.addEventListener('mousemove', (event) => {
 
 // Génération d'explosion de particules au clic
 document.addEventListener('click', (event) => {
-    for (let i = 0; i < 20; i++) { // Nombre de particules au clic
+    for (let i = 0; i < 10; i++) { // Nombre de particules au clic
         createParticle(event.clientX, event.clientY);
     }
 });
