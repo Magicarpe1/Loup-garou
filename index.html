@@ -235,55 +235,59 @@
     <script>
     const particlesContainer = document.getElementById('particles-container');
 
-        // Crée une particule
-        function createParticle(x, y, isFloating = false) {
-            const particle = document.createElement('div');
-            particle.className = 'particle';
-            particle.style.position = 'absolute';
-            particle.style.left = `${x}px`;
-            particle.style.top = `${y}px`;
-            particle.style.width = `${Math.random() * 4 + 2}px`; // Taille entre 2px et 6px
-            particle.style.height = particle.style.width;
-            particle.style.background = 'radial-gradient(circle, #fff, rgba(255, 255, 255, 0))'; // Effet brillant
-            particle.style.borderRadius = '50%';
-            particle.style.pointerEvents = 'none';
-            particle.style.opacity = Math.random();
+    // Crée une particule
+    function createParticle(x, y, isFloating = false) {
+        const particle = document.createElement('div');
+        particle.className = 'particle';
+        particle.style.position = 'absolute';
+        particle.style.left = `${x}px`;
+        particle.style.top = `${y}px`;
 
-            particlesContainer.appendChild(particle);
+        // Taille ajustable
+        particle.style.width = `${Math.random() * 3 + 1}px`; // Taille entre 1px et 4px (modifiable)
+        particle.style.height = particle.style.width;
 
-            // Animation aléatoire ou mouvement depuis la souris
-            const duration = Math.random() * 3 + 2; // Durée entre 2s et 5s
-            gsap.to(particle, {
-                x: isFloating ? (Math.random() - 0.5) * 200 : (Math.random() - 0.5) * 100,
-                y: isFloating ? (Math.random() - 0.5) * 200 : (Math.random() - 0.5) * 100,
-                opacity: 0,
-                scale: Math.random() * 1.5 + 0.5,
-                duration: duration,
-                ease: 'power1.out',
-                onComplete: () => particle.remove()
-            });
+        // Couleur ajustable
+        particle.style.background = 'radial-gradient(circle, #ffd700, rgba(255, 255, 255, 0))'; // Couleur dorée brillante
+        particle.style.borderRadius = '50%';
+        particle.style.pointerEvents = 'none';
+        particle.style.opacity = Math.random();
+
+        particlesContainer.appendChild(particle);
+
+        // Animation aléatoire ou mouvement depuis la souris
+        const duration = Math.random() * 3 + 2; // Durée entre 2s et 5s
+        gsap.to(particle, {
+            x: isFloating ? (Math.random() - 0.5) * 200 : (Math.random() - 0.5) * 100,
+            y: isFloating ? (Math.random() - 0.5) * 200 : (Math.random() - 0.5) * 100,
+            opacity: 0,
+            scale: Math.random() * 1.5 + 0.5,
+            duration: duration,
+            ease: 'power1.out',
+            onComplete: () => particle.remove()
+        });
+    }
+
+    // Génération des particules au survol de la souris
+    document.addEventListener('mousemove', (event) => {
+        for (let i = 0; i < 6; i++) { // Modifier le nombre de particules ici
+            createParticle(event.clientX, event.clientY);
         }
+    });
 
-        // Génération des particules au survol de la souris
-        document.addEventListener('mousemove', (event) => {
-            for (let i = 0; i < 3; i++) {
-                createParticle(event.clientX, event.clientY);
-            }
-        });
+    // Génération d'explosion de particules au clic
+    document.addEventListener('click', (event) => {
+        for (let i = 0; i < 20; i++) { // Modifier le nombre de particules au clic ici
+            createParticle(event.clientX, event.clientY);
+        }
+    });
 
-        // Génération d'explosion de particules au clic
-        document.addEventListener('click', (event) => {
-            for (let i = 0; i < 15; i++) {
-                createParticle(event.clientX, event.clientY);
-            }
-        });
-
-        // Génère des particules flottantes en permanence
-        setInterval(() => {
-            const x = Math.random() * window.innerWidth;
-            const y = Math.random() * window.innerHeight;
-            createParticle(x, y, true);
-        }, 300); // Toutes les 300ms, une particule est ajoutée
+    // Génère des particules flottantes en permanence
+    setInterval(() => {
+        const x = Math.random() * window.innerWidth;
+        const y = Math.random() * window.innerHeight;
+        createParticle(x, y, true);
+    }, 300); // Temps entre deux particules aléatoires (modifiable)
     // Configuration Firebase
     const firebaseConfig = {
         apiKey: "AIzaSyA2-e0dngn9BrksaAMEfXODLeiICmC0W6U",
