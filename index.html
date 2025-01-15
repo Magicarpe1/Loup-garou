@@ -400,6 +400,22 @@ function removeWerewolf() {
         .catch(err => console.error("Erreur lors de la suppression du loup-garou :", err));
 }
 
+// Afficher quel loup-garou est en train de voter
+function displayCurrentWerewolf() {
+    werewolvesRef.once('value', snapshot => {
+        const werewolves = snapshot.val() || {};
+        const werewolfKeys = Object.keys(werewolves);
+        const messageElement = document.getElementById('current-werewolf-message');
+
+        if (currentWerewolfIndex < werewolfKeys.length) {
+            const currentWerewolfKey = werewolfKeys[currentWerewolfIndex];
+            messageElement.textContent = `C'est au Loup-Garou ${currentWerewolfKey} de voter.`;
+        } else {
+            messageElement.textContent = "Tous les loups-garous ont voté.";
+        }
+    });
+}
+
 // Générer les boutons de vote
 function generateButtons(votes = {}) {
     const votingArea = document.getElementById('voting-area');
@@ -441,6 +457,7 @@ function vote(number) {
                 votesRef.child(`${number}_opacity`).set(0.4);
                 alert(`Loup-Garou ${currentWerewolfKey} a voté pour le numéro ${number} (${incrementValue} voix).`);
                 currentWerewolfIndex++; // Passer au prochain loup-garou
+                displayCurrentWerewolf(); // Mettre à jour le message
             })
             .catch(err => console.error("Erreur lors du vote :", err));
     });
@@ -465,6 +482,7 @@ function resetVotes() {
                     .then(() => {
                         alert('Votes réinitialisés et loups-garous prêts à revoter.');
                         currentWerewolfIndex = 0; // Réinitialiser l'ordre des votes
+                        displayCurrentWerewolf(); // Mettre à jour le message
                     });
             });
         })
@@ -477,6 +495,7 @@ function clearWerewolves() {
         .then(() => {
             alert('Liste des loups-garous effacée.');
             currentWerewolfIndex = 0; // Réinitialiser l'ordre des votes
+            displayCurrentWerewolf(); // Mettre à jour le message
         })
         .catch(err => console.error('Erreur lors de l’effacement :', err));
 }
@@ -504,6 +523,7 @@ votesRef.on('value', snapshot => {
 werewolvesRef.on('value', snapshot => {
     const werewolves = snapshot.val() || {};
     updateRemoveWerewolfDropdown(werewolves); // Met à jour la liste pour suppression
+    displayCurrentWerewolf(); // Met à jour le message du loup-garou en cours
 });
 </script>
 </html>
