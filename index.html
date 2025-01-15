@@ -181,6 +181,7 @@
 
     let werewolfVotes = {};
 
+    // Ajouter un loup-garou
     function addWerewolf() {
         const input = document.getElementById('add-werewolf-input');
         const number = parseInt(input.value);
@@ -194,11 +195,13 @@
         }
     }
 
+    // Afficher/Masquer la liste des loups-garous
     function toggleWerewolfList() {
         const container = document.getElementById('werewolf-container');
         container.style.display = container.style.display === 'none' ? 'block' : 'none';
     }
 
+    // Mettre à jour la liste des loups-garous
     function updateWerewolfList(werewolves) {
         const list = document.getElementById('werewolf-list');
         const orderText = document.getElementById('vote-order');
@@ -214,6 +217,7 @@
             : 'Tous les loups-garous ont voté.';
     }
 
+    // Générer les boutons de vote
     function generateButtons(votes = {}) {
         const votingArea = document.getElementById('voting-area');
         votingArea.innerHTML = '';
@@ -221,30 +225,26 @@
             const button = document.createElement('button');
             button.className = 'voting-button';
             button.setAttribute('data-number', i);
-            button.textContent = `Numéro ${i}\nVotes : ${votes[i] || 0}`;
-            button.style.opacity = votes[i] > 0 ? "1.5" : "1"; // Fonce le bouton si voté
+            button.textContent = `Numéro ${i}\nvotes : ${votes[i] || 0}`;
+            button.style.opacity = votes[`${i}_opacity`] || "1"; // Récupérer l'opacité depuis Firebase
             button.onclick = () => vote(i);
             votingArea.appendChild(button);
         }
     }
 
+    // Voter
     function vote(number) {
         werewolvesRef.once('value', snapshot => {
             const werewolves = snapshot.val() || {};
             const nextWerewolf = Object.keys(werewolves).find(w => !werewolves[w].voted);
+
             if (nextWerewolf) {
                 const isDoubleVote = werewolves[nextWerewolf].doubleVote;
                 const incrementValue = isDoubleVote ? 2 : 1;
                 votesRef.child(number).set(firebase.database.ServerValue.increment(incrementValue))
                     .then(() => {
                         werewolvesRef.child(nextWerewolf).update({ voted: true });
-
-                        // Met à jour visuellement le bouton sélectionné
-                        const button = document.querySelector(`button[data-number="${number}"]`);
-                        if (button) {
-                            button.style.opacity = "0.4"; // Réduire l'opacité
-                        }
-
+                        votesRef.child(`${number}_opacity`).set(0.4); // Ajouter l'état d'opacité
                         alert(`Loup-Garou ${nextWerewolf} a voté pour le numéro ${number} (${incrementValue} vote(s)).`);
                     })
                     .catch(err => console.error("Erreur de vote :", err));
@@ -254,54 +254,51 @@
         });
     }
 
+    // Réinitialiser les votes
     function resetVotes() {
         const resetData = {};
         for (let i = 1; i <= 60; i++) {
             resetData[i] = 0; // Réinitialise chaque vote à 0
+            resetData[`${i}_opacity`] = 1; // Réinitialise l'opacité
         }
         votesRef.set(resetData)
             .then(() => {
-                // Réinitialiser l'état des loups-garous
                 werewolvesRef.once('value', snapshot => {
                     const werewolves = snapshot.val() || {};
                     const updatedWerewolves = {};
                     Object.keys(werewolves).forEach(key => {
-                        updatedWerewolves[key] = { ...werewolves[key], voted: false }; // Remet le statut `voted` à false
+                        updatedWerewolves[key] = { ...werewolves[key], voted: false };
                     });
                     werewolvesRef.set(updatedWerewolves)
-                        .then(() => {
-                            // Réinitialiser les styles des boutons
-                            const buttons = document.querySelectorAll('.voting-button');
-                            buttons.forEach(button => {
-                                button.style.opacity = "0.4"; // Restaurer l'opacité normale
-                            });
-                            alert('Votes réinitialisés et loups-garous prêts à revoter.');
-                        })
+                        .then(() => alert('Votes réinitialisés et loups-garous prêts à revoter.'))
                         .catch(err => console.error('Erreur lors de la réinitialisation des loups-garous :', err));
                 });
             })
             .catch(err => console.error('Erreur lors de la réinitialisation des votes :', err));
     }
 
+    // Effacer les loups-garous
     function clearWerewolves() {
         werewolvesRef.remove()
             .then(() => alert('Liste des loups-garous effacée.'))
             .catch(err => console.error('Erreur lors de l’effacement :', err));
     }
 
+    // Soumettre les votes
     function submitVotes() {
         const results = document.getElementById('results');
         const resultsList = document.getElementById('results-list');
         votesRef.once('value', snapshot => {
             const votes = snapshot.val() || {};
             resultsList.innerHTML = Object.entries(votes)
-                .filter(([_, value]) => value > 0)
+                .filter(([key, value]) => key.endsWith('_opacity') === false && value > 0)
                 .map(([key, value]) => `<li>Numéro ${key} : ${value} votes</li>`)
                 .join('');
             results.style.display = 'block';
         });
     }
 
+    // Écoute Firebase pour mettre à jour en temps réel
     votesRef.on('value', snapshot => {
         const votes = snapshot.val() || {};
         generateButtons(votes);
