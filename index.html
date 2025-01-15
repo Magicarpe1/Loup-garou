@@ -16,14 +16,23 @@
     }
 
     input[type="number"] {
-        font-size: 1.5rem;
-        padding: 10px;
+        font-family: "Bad Horse", serif; /* Assure l'utilisation de la bonne police */
+        font-size: 1.2rem; /* Réduction de la taille du texte */
+        padding: 8px; /* Ajustement pour correspondre à la taille réduite */
         width: 200px;
         border: 2px solid #4b3621;
         border-radius: 5px;
+        background: #f3eac2; /* Couleur parchemin */
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); /* Ajout d'ombre */
+        color: #4b3621;
     }
 
-    /* Image au-dessus du background */
+    input[type="number"]:focus {
+        outline: none;
+        border-color: #bf8013; /* Bordure dorée au focus */
+        box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3); /* Ombre plus marquée */
+    }
+
     #overlay {
         position: absolute;
         top: 50%;
@@ -40,7 +49,7 @@
 
     h1 {
         font-size: 3rem;
-        color: #b2884c; /* Nouvelle couleur */
+        color: #b2884c;
         position: relative;
         z-index: 1;
     }
@@ -117,13 +126,13 @@
     /* Style pour la liste déroulante */
     select {
         font-family: "Bad Horse", serif;
-        font-size: 1.5rem;
-        padding: 15px;
+        font-size: 1.2rem; /* Réduction de la taille */
+        padding: 10px;
         width: 300px; /* Largeur augmentée */
         border: 2px solid #4b3621;
         border-radius: 8px;
         background: #f3eac2; /* Couleur parchemin */
-        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); /* Jeu d'ombre */
         margin: 20px auto;
         display: block;
         cursor: pointer;
@@ -138,10 +147,9 @@
 
     select option {
         font-family: "Bad Horse", serif;
-        font-size: 1.2rem;
+        font-size: 1.1rem; /* Réduction de la taille des options */
         color: #4b3621;
     }
-
 </style>
     <script src="https://www.gstatic.com/firebasejs/9.15.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.15.0/firebase-database-compat.js"></script>
