@@ -179,6 +179,49 @@
             z-index: -1; /* Derrière tout le contenu */
             pointer-events: none;
         }
+    #remove-werewolf-section {
+    position: fixed; /* Fixe l'élément en bas */
+    bottom: 20px; /* Distance par rapport au bas */
+    left: 50%; /* Centre horizontalement */
+    transform: translateX(-50%); /* Ajuste pour être parfaitement centré */
+    background: rgba(243, 234, 194, 0.9); /* Couleur de fond légèrement transparente */
+    padding: 10px 20px;
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); /* Ombre pour un effet de relief */
+    text-align: center;
+    z-index: 100; /* Toujours au-dessus des autres éléments */
+    }
+    #remove-werewolf-section h3 {
+    margin-bottom: 10px;
+    color: #4b3621; /* Couleur du texte */
+    font-family: "Bad Horse", serif; /* Police utilisée ailleurs */
+    }
+    #remove-werewolf-dropdown {
+    font-family: "Bad Horse", serif;
+    font-size: 1.2rem;
+    padding: 8px;
+    width: 250px;
+    border: 2px solid #4b3621;
+    border-radius: 8px;
+    background: #f3eac2;
+    margin-bottom: 10px;
+    margin-top: 10px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    }
+        }
+
+    #remove-werewolf-dropdown:focus {
+    outline: none;
+    border-color: #bf8013;
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3);
+    }
+    
+        }
+    #remove-werewolf-section .button {
+    margin-top: 10px;
+    }
+        }
+
     </style>
     <script src="https://www.gstatic.com/firebasejs/9.15.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.15.0/firebase-database-compat.js"></script>
@@ -229,8 +272,18 @@
         <input type="number" id="add-werewolf-input" placeholder="Numéro du Loup-Garou">
         <button class="button" onclick="addWerewolf()">Ajouter</button>
     </div>
+    <div id="remove-werewolf-section">
+    <div style="margin-top: 50px;">
+    <h3>Supprimer un Loup-Garou</h3>
+    <select id="remove-werewolf-dropdown">
+        <option value="">-- Sélectionnez un loup-garou --</option>
+    </select>
+    <button class="button" onclick="removeWerewolf()">Supprimer</button>
+    </div>
     <button class="button" onclick="clearWerewolves()">Effacer les loups-garous</button>
-</body>
+
+    <button class="button" onclick="clearWerewolves()">Effacer les loups-garous</button>
+    </body>
 
     <script>
     const particlesContainer = document.getElementById('particles-container');
@@ -358,6 +411,38 @@ setInterval(() => {
             alert('Veuillez entrer un numéro valide.');
         }
     }
+    // Mettre à jour la liste déroulante pour la suppression des loups-garous
+    function updateRemoveWerewolfDropdown(werewolves) {
+        const removeDropdown = document.getElementById('remove-werewolf-dropdown');
+        removeDropdown.innerHTML = `<option value="">-- Sélectionnez un loup-garou --</option>`;
+        Object.keys(werewolves || {}).forEach(key => {
+            removeDropdown.innerHTML += `<option value="${key}">Loup-Garou ${key}</option>`;
+        });
+    }
+
+    // Supprimer un loup-garou
+    function removeWerewolf() {
+        const removeDropdown = document.getElementById('remove-werewolf-dropdown');
+        const werewolfToRemove = removeDropdown.value;
+
+        if (!werewolfToRemove) {
+            alert('Veuillez sélectionner un loup-garou à supprimer.');
+            return;
+        }
+
+        werewolvesRef.child(werewolfToRemove).remove()
+            .then(() => {
+                alert(`Loup-Garou ${werewolfToRemove} a été supprimé.`);
+                removeDropdown.value = '';
+            })
+            .catch(err => console.error("Erreur lors de la suppression du loup-garou :", err));
+    }
+
+    // Mettre à jour la liste des loups-garous
+    werewolvesRef.on('value', snapshot => {
+        const werewolves = snapshot.val() || {};
+        updateRemoveWerewolfDropdown(werewolves); // Met à jour la liste déroulante pour suppression
+    });
 
     // Mettre à jour la liste déroulante pour la sélection des loups-garous
     function updateWerewolfDropdown(werewolves) {
