@@ -244,11 +244,11 @@
         particle.style.top = `${y}px`;
 
         // Taille ajustable
-        particle.style.width = `${Math.random() * 3 + 1}px`; // Taille entre 1px et 4px (modifiable)
+        particle.style.width = `${Math.random() * 6 + 3}px`; // Taille entre 1px et 4px (modifiable)
         particle.style.height = particle.style.width;
 
         // Couleur ajustable
-        particle.style.background = 'radial-gradient(circle, #ffd700, rgba(255, 255, 255, 0))'; // Couleur dorée brillante
+        particle.style.background = 'radial-gradient(circle, #b2884c, rgba(255, 255, 255, 0))'; // Couleur dorée brillante
         particle.style.borderRadius = '50%';
         particle.style.pointerEvents = 'none';
         particle.style.opacity = Math.random();
@@ -270,7 +270,7 @@
 
     // Génération des particules au survol de la souris
     document.addEventListener('mousemove', (event) => {
-        for (let i = 0; i < 6; i++) { // Modifier le nombre de particules ici
+        for (let i = 0; i < 10; i++) { // Modifier le nombre de particules ici
             createParticle(event.clientX, event.clientY);
         }
     });
@@ -287,7 +287,7 @@
         const x = Math.random() * window.innerWidth;
         const y = Math.random() * window.innerHeight;
         createParticle(x, y, true);
-    }, 300); // Temps entre deux particules aléatoires (modifiable)
+    }, 50); // Temps entre deux particules aléatoires (modifiable)
     // Configuration Firebase
     const firebaseConfig = {
         apiKey: "AIzaSyA2-e0dngn9BrksaAMEfXODLeiICmC0W6U",
