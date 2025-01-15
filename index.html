@@ -190,7 +190,6 @@
     <div id="overlay"></div>
 
     <!-- Titre principal -->
-    <h1>QUE LA NUIT COMMENCE 🌓 !</h1>
     <h1>QUE LA NUIT COMMENCE 🌓 </h1>
     <!-- Texte descriptif -->
     <p style="font-family: 'Bad Horse', serif; color: #b2884c; font-size: 1.5rem; margin-top: 10px;">
@@ -235,30 +234,44 @@
 
     <script>
     const particlesContainer = document.getElementById('particles-container');
+let mouseX = window.innerWidth / 2; // Position initiale de la souris
+let mouseY = window.innerHeight / 2;
+let mouseMoving = false;
 
 // Crée une particule
 function createParticle(x, y, isFloating = false) {
     const particle = document.createElement('div');
     particle.className = 'particle';
     particle.style.position = 'absolute';
-    particle.style.left = ${x}px;
-    particle.style.top = ${y}px;
     particle.style.left = `${x}px`;
     particle.style.top = `${y}px`;
 
     // Taille ajustable
-    particle.style.width = ${Math.random() * 6 + 3}px; // Taille entre 3px et 9px
     particle.style.width = `${Math.random() * 6 + 3}px`; // Taille entre 3px et 9px
     particle.style.height = particle.style.width;
 
     // Couleur ajustable pour effet étoile brillante
     particle.style.background = 'radial-gradient(circle, #b2884c, rgba(255, 255, 255, 0))'; // Couleur dorée brillante // Dégradé étoilé
+    particle.style.background = 'radial-gradient(circle, #b2884c, rgba(255, 255, 255, 0))'; // Dégradé doré
     particle.style.borderRadius = '50%';
     particle.style.pointerEvents = 'none';
     particle.style.opacity = Math.random();
 
     particlesContainer.appendChild(particle);
 
+    const duration = Math.random() * 3 + 2; // Durée entre 2s et 5s
+    // Déplacer les particules aléatoirement
+    function animateRandomMovement() {
+        gsap.to(particle, {
+            x: isFloating ? (Math.random() - 0.5) * 200 : (Math.random() - 0.5) * 100,
+            y: isFloating ? (Math.random() - 0.5) * 200 : (Math.random() - 0.5) * 100,
+            opacity: 0,
+            scale: Math.random() * 1.5 + 0.5,
+            duration: duration,
+            ease: 'power1.out',
+            onComplete: () => particle.remove()
+        });
+    }
     // Animation de scintillement (changement d'opacité)
     gsap.to(particle, {
         opacity: 0.5 + Math.random() * 0.5, // Scintille entre 0.5 et 1
@@ -280,9 +293,34 @@ function createParticle(x, y, isFloating = false) {
         ease: 'power1.out',
         onComplete: () => particle.remove()
     });
+    // Animation suivant la souris (attraction légère)
+    function followMouse() {
+        if (mouseMoving) {
+            gsap.to(particle, {
+                x: `+=${(mouseX - x) * 0.05}`, // Attraction vers la souris
+                y: `+=${(mouseY - y) * 0.05}`,
+                duration: 0.5,
+                ease: 'power1.out',
+                onComplete: animateRandomMovement
+            });
+        } else {
+            animateRandomMovement();
+        }
+    }
+    followMouse();
 }
 
 // Génération des particules au survol de la souris
+// Suivre la position de la souris
+document.addEventListener('mousemove', (event) => {
+    mouseX = event.clientX;
+    mouseY = event.clientY;
+    mouseMoving = true;
+    setTimeout(() => {
+        mouseMoving = false; // Arrête le mouvement après un délai
+    }, 200);
+});
+// Génération de particules au survol de la souris
 document.addEventListener('mousemove', (event) => {
     for (let i = 0; i < 15; i++) { // Modifier le nombre de particules ici
         createParticle(event.clientX, event.clientY);
