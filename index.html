@@ -1,168 +1,182 @@
-<style>
-    @font-face {
-        font-family: "Bad Horse";
-        src: url("https://ik.imagekit.io/lakolo/JMH%20Beda.ttf?updatedAt=1736878741238");
-    }
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vote Loup-Garou</title>
+    <style>
+        @font-face {
+            font-family: "Bad Horse";
+            src: url("https://ik.imagekit.io/lakolo/JMH%20Beda.ttf?updatedAt=1736878741238");
+        }
 
-    body {
-        font-family: "Bad Horse", serif;
-        background: url("https://ik.imagekit.io/lakolo/3.jpg?updatedAt=1736868334601") no-repeat center center fixed;
-        background-size: cover;
-        color: #4b3621;
-        text-align: center;
-        margin: 0;
-        padding: 20px;
-        position: relative;
-    }
+        body {
+            font-family: "Bad Horse", serif;
+            background: url("https://ik.imagekit.io/lakolo/3.jpg?updatedAt=1736868334601") no-repeat center center fixed;
+            background-size: cover;
+            color: #4b3621;
+            text-align: center;
+            margin: 0;
+            padding: 20px;
+            position: relative;
+        }
 
-    /* Texte en haut à droite */
-    #developed-by {
-    position: absolute;
-    top: 10px;
-    right: 20px;
-    font-family: "Bad Horse", serif;
-    font-size: 1.8rem;
-    color: #b2884c;
-    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
-    z-index: 100;
-    }
-    
-    input[type="number"] {
-        font-family: "Bad Horse", serif; /* Assure l'utilisation de la bonne police */
-        font-size: 0.9rem; /* Réduction de la taille du texte */
-        padding: 8px; /* Ajustement pour correspondre à la taille réduite */
-        width: 200px;
-        border: 2px solid #4b3621;
-        border-radius: 5px;
-        background: #f3eac2; /* Couleur parchemin */
-        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); /* Ajout d'ombre */
-        color: #4b3621;
-    }
+        /* Texte en haut à droite */
+        #developed-by {
+            position: absolute;
+            top: 10px;
+            right: 20px;
+            font-family: "Bad Horse", serif;
+            font-size: 1.8rem;
+            color: #b2884c;
+            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+            z-index: 100;
+        }
 
-    input[type="number"]:focus {
-        outline: none;
-        border-color: #bf8013; /* Bordure dorée au focus */
-        box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3); /* Ombre plus marquée */
-    }
+        input[type="number"] {
+            font-family: "Bad Horse", serif;
+            font-size: 0.9rem;
+            padding: 8px;
+            width: 200px;
+            border: 2px solid #4b3621;
+            border-radius: 5px;
+            background: #f3eac2;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            color: #4b3621;
+        }
 
-    #overlay {
-        position: absolute;
-        top: 50%;
-        left: 50%;
-        transform: translate(-50%, -50%);
-        opacity: 0.3;
-        background: url("https://ik.imagekit.io/lakolo/Loups-garous_de_Thiercelieux.png?updatedAt=1736870142041") no-repeat center;
-        background-size: contain;
-        width: 80%;
-        height: 80%;
-        z-index: 0;
-        pointer-events: none;
-    }
+        input[type="number"]:focus {
+            outline: none;
+            border-color: #bf8013;
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3);
+        }
 
-    h1 {
-        font-size: 3rem;
-        color: #b2884c;
-        position: relative;
-        z-index: 1;
-    }
+        #overlay {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            opacity: 0.3;
+            background: url("https://ik.imagekit.io/lakolo/Loups-garous_de_Thiercelieux.png?updatedAt=1736870142041") no-repeat center;
+            background-size: contain;
+            width: 80%;
+            height: 80%;
+            z-index: 0;
+            pointer-events: none;
+        }
 
-    h3 {
-        color: #b2884c !important;
-    }
+        h1 {
+            font-size: 3rem;
+            color: #b2884c;
+            position: relative;
+            z-index: 1;
+        }
 
-    #vote-order {
-        color: #b2884c;
-    }
+        h3 {
+            color: #b2884c !important;
+        }
 
-    .button {
-        margin: 10px;
-        padding: 15px 30px;
-        font-size: 1.2rem;
-        color: #030202;
-        background: url("https://ik.imagekit.io/lakolo/3.jpg?updatedAt=1736868334601") no-repeat center center;
-        background-size: cover;
-        border: none;
-        border-radius: 10px;
-        cursor: pointer;
-        font-family: "Bad Horse", serif;
-        box-shadow: 0 0 15px rgba(0, 0, 0, 0.3);
-        position: relative;
-        z-index: 1;
-    }
+        #vote-order {
+            color: #b2884c;
+        }
 
-    .button:hover {
-        transform: scale(1.05);
-        background-color: rgba(75, 54, 33, 0.9);
-    }
+        .button {
+            margin: 10px;
+            padding: 15px 30px;
+            font-size: 1.2rem;
+            color: #030202;
+            background: url("https://ik.imagekit.io/lakolo/3.jpg?updatedAt=1736868334601") no-repeat center center;
+            background-size: cover;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            font-family: "Bad Horse", serif;
+            box-shadow: 0 0 15px rgba(0, 0, 0, 0.3);
+            position: relative;
+            z-index: 1;
+        }
 
-    .voting-area {
-        display: flex;
-        justify-content: center;
-        gap: 20px;
-        flex-wrap: wrap;
-        position: relative;
-        z-index: 1;
-    }
+        .button:hover {
+            transform: scale(1.05);
+            background-color: rgba(75, 54, 33, 0.9);
+        }
 
-    .voting-button {
-        background: url("https://ik.imagekit.io/lakolo/3.jpg?updatedAt=1736868334601") no-repeat center center;
-        background-size: cover;
-        border: 2px solid #4b3621;
-        border-radius: 15px;
-        font-family: "Bad Horse", serif;
-        padding: 10px 20px;
-        margin: 5px;
-        color: #4b3621;
-        font-size: 1.2rem;
-        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-        position: relative;
-        z-index: 1;
-    }
+        .voting-area {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            flex-wrap: wrap;
+            position: relative;
+            z-index: 1;
+        }
 
-    .voting-button:hover {
-        background-color: rgba(75, 54, 33, 0.9);
-        color: #fff;
-    }
+        .voting-button {
+            background: url("https://ik.imagekit.io/lakolo/3.jpg?updatedAt=1736868334601") no-repeat center center;
+            background-size: cover;
+            border: 2px solid #4b3621;
+            border-radius: 15px;
+            font-family: "Bad Horse", serif;
+            padding: 10px 20px;
+            margin: 5px;
+            color: #4b3621;
+            font-size: 1.2rem;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            position: relative;
+            z-index: 1;
+        }
 
-    #results {
-        margin-top: 20px;
-        font-family: "Bad Horse", serif;
-        position: relative;
-        z-index: 1;
-    }
+        .voting-button:hover {
+            background-color: rgba(75, 54, 33, 0.9);
+            color: #fff;
+        }
 
-    li {
-        color: #4b3621;
-    }
+        #results {
+            margin-top: 20px;
+            font-family: "Bad Horse", serif;
+            position: relative;
+            z-index: 1;
+        }
 
-    /* Style pour la liste déroulante */
-    select {
-        font-family: "Bad Horse", serif;
-        font-size: 1.2rem; /* Réduction de la taille */
-        padding: 10px;
-        width: 300px; /* Largeur augmentée */
-        border: 2px solid #4b3621;
-        border-radius: 8px;
-        background: #f3eac2; /* Couleur parchemin */
-        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); /* Jeu d'ombre */
-        margin: 20px auto;
-        display: block;
-        cursor: pointer;
-        color: #4b3621;
-    }
+        li {
+            color: #4b3621;
+        }
 
-    select:focus {
-        outline: none;
-        border-color: #bf8013; /* Bordure dorée en focus */
-        box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3);
-    }
+        /* Style pour la liste déroulante */
+        select {
+            font-family: "Bad Horse", serif;
+            font-size: 1.2rem;
+            padding: 10px;
+            width: 300px;
+            border: 2px solid #4b3621;
+            border-radius: 8px;
+            background: #f3eac2;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            margin: 20px auto;
+            display: block;
+            cursor: pointer;
+            color: #4b3621;
+        }
 
-    select option {
-        font-family: "Bad Horse", serif;
-        font-size: 1.1rem; /* Réduction de la taille des options */
-        color: #4b3621;
-    }
-</style>
+        select:focus {
+            outline: none;
+            border-color: #bf8013;
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3);
+        }
+
+        select option {
+            font-family: "Bad Horse", serif;
+            font-size: 1.1rem;
+            color: #4b3621;
+        }
+
+        /* Nouveau style pour le texte descriptif */
+        #description {
+            font-family: "Bad Horse", serif;
+            color: #b2884c;
+            font-size: 1.5rem;
+            margin-top: 10px;
+        }
+    </style>
     <script src="https://www.gstatic.com/firebasejs/9.15.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.15.0/firebase-database-compat.js"></script>
 </head>
