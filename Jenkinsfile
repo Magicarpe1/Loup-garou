@@ -22,11 +22,15 @@ pipeline {
 
     stage('Push to DockerHub') {
       steps {
-        script {
-          // Utilisation du credential 'dockerhub-creds' configuré dans Jenkins
-          docker.withRegistry('https://registry-1.docker.io', 'dockerhub-creds') {
-            sh "docker push ${DOCKERHUB_REPO}:${env.BRANCH_NAME}"
-          }
+        withCredentials([usernamePassword(
+          credentialsId: 'dockerhub-creds',
+          usernameVariable: 'DOCKERHUB_USER',
+          passwordVariable: 'DOCKERHUB_PASS'
+        )]) {
+          sh '''
+            echo "$DOCKERHUB_PASS" | docker login -u "$DOCKERHUB_USER" --password-stdin
+            docker push "${DOCKERHUB_REPO}:${BRANCH_NAME}"
+          '''
         }
       }
     }
@@ -50,3 +54,4 @@ pipeline {
     }
   }
 }
+
