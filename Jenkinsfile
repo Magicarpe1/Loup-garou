@@ -26,7 +26,8 @@ pipeline {
             steps {
                 sh '''
                 kubectl config use-context minikube
-                helm upgrade --install examen-app ./charts/examen --namespace main --create-namespace \
+                helm upgrade --install examen-app ./charts/examen \
+                  --namespace main --create-namespace \
                   --set image.repository=magicarpe1/examen-app \
                   --set image.tag=${BRANCH_NAME}
                 '''
