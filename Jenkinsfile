@@ -2,9 +2,13 @@ pipeline {
   agent any
 
   environment {
-    DOCKERHUB_REPO = 'magicarpe1/examen-app'
-    KUBE_CONTEXT   = 'minikube'
-    PATH           = '/usr/local/bin:/usr/bin:/bin'
+    DOCKERHUB_REPO        = 'magicarpe1/examen-app'
+    KUBE_CONTEXT          = 'minikube'
+    // Injecte automatiquement deux variables :
+    //   DOCKERHUB_CREDENTIALS_USR  = le username
+    //   DOCKERHUB_CREDENTIALS_PSW  = le token
+    DOCKERHUB_CREDENTIALS = credentials('dockerhub-creds')
+    PATH                  = '/usr/local/bin:/usr/bin:/bin'
   }
 
   stages {
@@ -22,23 +26,18 @@ pipeline {
 
     stage('Push to DockerHub') {
       steps {
-        withCredentials([usernamePassword(
-          credentialsId: 'dockerhub-creds',
-          usernameVariable: 'DOCKERHUB_USER',
-          passwordVariable: 'DOCKERHUB_PASS'
-        )]) {
-          sh '''
-            echo "$DOCKERHUB_PASS" | docker login -u "$DOCKERHUB_USER" --password-stdin
-            docker push "${DOCKERHUB_REPO}:${BRANCH_NAME}"
-          '''
-        }
+        sh """
+          echo '🔑 Login sur DockerHub…'
+          docker login -u ${DOCKERHUB_CREDENTIALS_USR} -p ${DOCKERHUB_CREDENTIALS_PSW}
+          docker push ${DOCKERHUB_REPO}:${env.BRANCH_NAME}
+        """
       }
     }
 
     stage('Deploy to Kubernetes') {
       steps {
         script {
-          def ns = (env.BRANCH_NAME == 'master') ? 'prod' : env.BRANCH_NAME
+          def ns = env.BRANCH_NAME == 'master' ? 'prod' : env.BRANCH_NAME
           sh "kubectl config use-context ${KUBE_CONTEXT} && helm upgrade --install examen-app charts/examen --namespace ${ns} --set image.tag=${env.BRANCH_NAME}"
         }
       }
