@@ -1,20 +1,29 @@
 pipeline {
   agent any
+
   environment {
     DOCKERHUB_REPO = 'magicarpe1/examen-app'
     KUBE_CONTEXT   = 'minikube'
   }
+
   stages {
     stage('Checkout') {
-      steps { checkout scm }
+      steps {
+        // Récupère le code depuis GitHub
+        checkout scm
+      }
     }
+
     stage('Build Docker Image') {
       steps {
+        // Construit l’image Docker avec le tag de la branche
         sh 'docker build -t $DOCKERHUB_REPO:${env.BRANCH_NAME} .'
       }
     }
+
     stage('Push to DockerHub') {
       steps {
+        // Utilise les credentials Jenkins pour se connecter à DockerHub
         withCredentials([usernamePassword(
           credentialsId: 'dockerhub-creds',
           usernameVariable: 'USER',
@@ -25,20 +34,29 @@ pipeline {
         }
       }
     }
+
     stage('Deploy to Kubernetes') {
       steps {
         script {
+          // Choisit le namespace selon la branche
           def ns = (env.BRANCH_NAME == 'master') ? 'prod' : env.BRANCH_NAME
-          sh "kubectl config use-context $KUBE_CONTEXT"
-          sh "helm upgrade --install examen-app charts/examen --namespace $ns --set 
+          // Change le contexte Kubernetes
+          sh "kubectl config use-context ${KUBE_CONTEXT}"
+          // Déploie ou met à jour avec Helm en une seule ligne
+          sh "kubectl config use-context ${KUBE_CONTEXT} && " +
+             "helm upgrade --install examen-app charts/examen --namespace ${ns} --set 
 image.tag=${env.BRANCH_NAME}"
         }
       }
     }
   }
+
   post {
-    success { echo "Succès pour ${env.BRANCH_NAME}" }
-    failure { echo "Échec pour ${env.BRANCH_NAME}" }
+    success {
+      echo "Pipeline terminé avec succès pour la branche ${env.BRANCH_NAME}"
+    }
+    failure {
+      echo "Échec du pipeline pour la branche ${env.BRANCH_NAME}"
+    }
   }
 }
-
