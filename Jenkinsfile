@@ -4,7 +4,7 @@ pipeline {
   environment {
     DOCKERHUB_REPO = 'magicarpe1/examen-app'
     KUBE_CONTEXT   = 'minikube'
-    PATH           = "/usr/local/bin:/opt/homebrew/bin:${env.PATH}"
+    PATH           = "/opt/homebrew/bin:/usr/local/bin:${env.PATH}"
   }
 
   stages {
@@ -22,12 +22,8 @@ pipeline {
 
     stage('Push to DockerHub') {
       steps {
-        withCredentials([usernamePassword(
-          credentialsId: 'dockerhub-creds',
-          usernameVariable: 'DOCKERHUB_USER',
-          passwordVariable: 'DOCKERHUB_PASS'
-        )]) {
-          sh 'echo "$DOCKERHUB_PASS" | docker login -u "$DOCKERHUB_USER" --password-stdin'
+        withCredentials([usernamePassword(credentialsId: 'dockerhub-creds', usernameVariable: 'USER', passwordVariable: 'PASSWORD')]) {
+          sh 'echo $PASSWORD | docker login -u $USER --password-stdin'
           sh "docker push ${DOCKERHUB_REPO}:${env.BRANCH_NAME}"
         }
       }
@@ -36,11 +32,12 @@ pipeline {
     stage('Deploy to Kubernetes') {
       steps {
         script {
-          def ns = (env.BRANCH_NAME == 'master') ? 'prod' : env.BRANCH_NAME
-          sh """
+          def ns = (env.BRANCH_NAME == 'main') ? 'prod' : env.BRANCH_NAME
+          sh '''
+            export PATH=/opt/homebrew/bin:/usr/local/bin:$PATH
             kubectl config use-context ${KUBE_CONTEXT}
-            helm upgrade --install examen-app ./charts/examen --namespace ${ns} --set image.tag=${env.BRANCH_NAME}
-          """
+            helm upgrade --install examen-app ./charts/examen --namespace ${ns} --create-namespace --set image.tag=${env.BRANCH_NAME}
+          '''
         }
       }
     }
