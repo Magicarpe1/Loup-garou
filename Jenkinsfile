@@ -26,7 +26,7 @@ pipeline {
           usernameVariable: 'USER',
           passwordVariable: 'PWD'
         )]) {
-          sh "echo $PWD | docker login -u $USER --password-stdin"
+          sh "echo \$PWD | docker login -u \$USER --password-stdin"
           sh "docker push ${DOCKERHUB_REPO}:${env.BRANCH_NAME}"
         }
       }
@@ -36,8 +36,7 @@ pipeline {
       steps {
         script {
           def ns = (env.BRANCH_NAME == 'master') ? 'prod' : env.BRANCH_NAME
-          sh "kubectl config use-context ${KUBE_CONTEXT} && helm upgrade --install examen-app 
-charts/examen --namespace ${ns} --set image.tag=${env.BRANCH_NAME}"
+          sh "kubectl config use-context ${KUBE_CONTEXT} && helm upgrade --install examen-app charts/examen --namespace ${ns} --set image.tag=${env.BRANCH_NAME}"
         }
       }
     }
