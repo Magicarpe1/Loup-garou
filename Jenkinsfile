@@ -2,15 +2,16 @@ pipeline {
   agent any
 
   environment {
-    // Variables globales
     DOCKERHUB_REPO = 'magicarpe1/examen-app'
     KUBE_CONTEXT   = 'minikube'
-    PATH            = "/usr/local/bin:/usr/bin:/bin"
+    PATH           = '/usr/local/bin:/usr/bin:/bin'
   }
 
   stages {
     stage('Checkout') {
-      steps { checkout scm }
+      steps {
+        checkout scm
+      }
     }
 
     stage('Build Docker Image') {
@@ -22,7 +23,7 @@ pipeline {
     stage('Push to DockerHub') {
       steps {
         script {
-          // Utilise le plugin Docker Registry de Jenkins pour login/push
+          // Utilisation du credential 'dockerhub-creds' configuré dans Jenkins
           docker.withRegistry('https://registry-1.docker.io', 'dockerhub-creds') {
             sh "docker push ${DOCKERHUB_REPO}:${env.BRANCH_NAME}"
           }
@@ -41,8 +42,11 @@ pipeline {
   }
 
   post {
-    success { echo "✅ Pipeline OK pour la branche ${env.BRANCH_NAME}" }
-    failure { echo "❌ Pipeline échoué pour la branche ${env.BRANCH_NAME}" }
+    success {
+      echo "✅ Pipeline OK pour la branche ${env.BRANCH_NAME}"
+    }
+    failure {
+      echo "❌ Pipeline échoué pour la branche ${env.BRANCH_NAME}"
+    }
   }
 }
-
