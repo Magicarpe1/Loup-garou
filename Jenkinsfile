@@ -4,7 +4,7 @@ pipeline {
   environment {
     DOCKERHUB_REPO = 'magicarpe1/examen-app'
     KUBE_CONTEXT   = 'minikube'
-    PATH           = '/usr/local/bin:/usr/bin:/bin'
+    PATH = "/opt/homebrew/bin:$PATH"
   }
 
   stages {
