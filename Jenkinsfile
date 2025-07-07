@@ -2,9 +2,12 @@ pipeline {
   agent any
 
   environment {
+    // Votre repo DockerHub
     DOCKERHUB_REPO = 'magicarpe1/examen-app'
+    // Contexte Kubernetes
     KUBE_CONTEXT   = 'minikube'
-    PATH = "/opt/homebrew/bin:$PATH"
+    // On injecte le binaire helm dans le PATH
+    PATH           = "/opt/homebrew/bin:${env.PATH}"
   }
 
   stages {
@@ -16,7 +19,11 @@ pipeline {
 
     stage('Build Docker Image') {
       steps {
-        sh "docker build -t ${DOCKERHUB_REPO}:${env.BRANCH_NAME} ."
+        sh """
+          docker build \
+            -t ${DOCKERHUB_REPO}:${env.BRANCH_NAME} \
+            .
+        """
       }
     }
 
@@ -27,10 +34,10 @@ pipeline {
           usernameVariable: 'DOCKERHUB_USER',
           passwordVariable: 'DOCKERHUB_PASS'
         )]) {
-          // login
-          sh 'echo $DOCKERHUB_PASS | docker login -u $DOCKERHUB_USER --password-stdin'
-          // push
-          sh "docker push ${DOCKERHUB_REPO}:${env.BRANCH_NAME}"
+          sh """
+            echo "\$DOCKERHUB_PASS" | docker login -u "\$DOCKERHUB_USER" --password-stdin
+            docker push ${DOCKERHUB_REPO}:${env.BRANCH_NAME}
+          """
         }
       }
     }
@@ -38,9 +45,14 @@ pipeline {
     stage('Deploy to Kubernetes') {
       steps {
         script {
+          // namespace = branch sauf si master → prod
           def ns = (env.BRANCH_NAME == 'master') ? 'prod' : env.BRANCH_NAME
-          // une seule commande : pas de retour à la ligne
-          sh "kubectl config use-context ${KUBE_CONTEXT} && helm upgrade --install examen-app charts/examen --namespace ${ns} --set image.tag=${env.BRANCH_NAME}"
+          sh """
+            kubectl config use-context ${KUBE_CONTEXT}
+            helm upgrade --install examen-app charts/examen \
+              --namespace ${ns} \
+              --set image.tag=${env.BRANCH_NAME}
+          """
         }
       }
     }
