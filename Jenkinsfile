@@ -2,9 +2,10 @@ pipeline {
   agent any
 
   environment {
+    // Variables globales
     DOCKERHUB_REPO = 'magicarpe1/examen-app'
     KUBE_CONTEXT   = 'minikube'
-    PATH = "/usr/local/bin:/usr/bin:/bin"
+    PATH            = "/usr/local/bin:/usr/bin:/bin"
   }
 
   stages {
@@ -20,13 +21,11 @@ pipeline {
 
     stage('Push to DockerHub') {
       steps {
-        withCredentials([usernamePassword(
-          credentialsId: 'dockerhub-creds',
-          usernameVariable: 'DOCKERHUB_USER',
-          passwordVariable: 'DOCKERHUB_PASS'
-        )]) {
-          sh 'echo $DOCKERHUB_PASS | docker login -u $DOCKERHUB_USER --password-stdin'
-          sh "docker push ${DOCKERHUB_REPO}:${env.BRANCH_NAME}"
+        script {
+          // Utilise le plugin Docker Registry de Jenkins pour login/push
+          docker.withRegistry('https://registry-1.docker.io', 'dockerhub-creds') {
+            sh "docker push ${DOCKERHUB_REPO}:${env.BRANCH_NAME}"
+          }
         }
       }
     }
