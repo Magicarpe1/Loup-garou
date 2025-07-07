@@ -16,7 +16,7 @@ pipeline {
 
     stage('Build Docker Image') {
       steps {
-        sh "docker build -t ${DOCKERHUB_REPO}:${BRANCH_NAME} ."
+        sh "docker build -t ${DOCKERHUB_REPO}:${env.BRANCH_NAME} ."
       }
     }
 
@@ -27,9 +27,10 @@ pipeline {
           usernameVariable: 'DOCKERHUB_USER',
           passwordVariable: 'DOCKERHUB_PASS'
         )]) {
-          // Login and push as two separate commands to ensure pipe works
-          sh "echo $DOCKERHUB_PASS | docker login -u $DOCKERHUB_USER --password-stdin"
-          sh "docker push ${DOCKERHUB_REPO}:${BRANCH_NAME}"
+          // login
+          sh 'echo $DOCKERHUB_PASS | docker login -u $DOCKERHUB_USER --password-stdin'
+          // push
+          sh "docker push ${DOCKERHUB_REPO}:${env.BRANCH_NAME}"
         }
       }
     }
@@ -37,8 +38,9 @@ pipeline {
     stage('Deploy to Kubernetes') {
       steps {
         script {
-          def ns = (BRANCH_NAME == 'master') ? 'prod' : BRANCH_NAME
-          sh "kubectl config use-context ${KUBE_CONTEXT} && helm upgrade --install examen-app charts/examen --namespace ${ns} --set image.tag=${BRANCH_NAME}"
+          def ns = (env.BRANCH_NAME == 'master') ? 'prod' : env.BRANCH_NAME
+          // une seule commande : pas de retour à la ligne
+          sh "kubectl config use-context ${KUBE_CONTEXT} && helm upgrade --install examen-app charts/examen --namespace ${ns} --set image.tag=${env.BRANCH_NAME}"
         }
       }
     }
@@ -46,10 +48,10 @@ pipeline {
 
   post {
     success {
-      echo "✅ Pipeline OK pour la branche ${BRANCH_NAME}"
+      echo "✅ Pipeline OK pour la branche ${env.BRANCH_NAME}"
     }
     failure {
-      echo "❌ Pipeline échoué pour la branche ${BRANCH_NAME}"
+      echo "❌ Pipeline échoué pour la branche ${env.BRANCH_NAME}"
     }
   }
 }
