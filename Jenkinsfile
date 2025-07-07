@@ -33,11 +33,13 @@ pipeline {
       steps {
         script {
           def ns = (env.BRANCH_NAME == 'main') ? 'prod' : env.BRANCH_NAME
-          sh '''
-            export PATH=/opt/homebrew/bin:/usr/local/bin:$PATH
+          sh """
+            export PATH=/opt/homebrew/bin:/usr/local/bin:\$PATH
             kubectl config use-context ${KUBE_CONTEXT}
-            helm upgrade --install examen-app ./charts/examen --namespace ${ns} --create-namespace --set image.tag=${env.BRANCH_NAME}
-          '''
+            helm upgrade --install examen-app ./charts/examen \\
+              --namespace ${ns} --create-namespace \\
+              --set image.tag=${env.BRANCH_NAME}
+          """
         }
       }
     }
