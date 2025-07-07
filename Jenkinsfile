@@ -2,12 +2,11 @@ pipeline {
   agent any
 
   environment {
-    // Votre repo DockerHub
     DOCKERHUB_REPO = 'magicarpe1/examen-app'
-    // Contexte Kubernetes
     KUBE_CONTEXT   = 'minikube'
-    // On injecte le binaire helm dans le PATH
-    PATH           = "/opt/homebrew/bin:${env.PATH}"
+    PATH           = "/usr/local/bin:/opt/homebrew/bin:${env.PATH}"
+    DOCKER_CMD     = 'docker'
+    HELM_CMD       = 'helm'
   }
 
   stages {
@@ -20,8 +19,8 @@ pipeline {
     stage('Build Docker Image') {
       steps {
         sh """
-          docker build \
-            -t ${DOCKERHUB_REPO}:${env.BRANCH_NAME} \
+          ${DOCKER_CMD} build \\
+            -t ${DOCKERHUB_REPO}:${env.BRANCH_NAME} \\
             .
         """
       }
@@ -35,8 +34,8 @@ pipeline {
           passwordVariable: 'DOCKERHUB_PASS'
         )]) {
           sh """
-            echo "\$DOCKERHUB_PASS" | docker login -u "\$DOCKERHUB_USER" --password-stdin
-            docker push ${DOCKERHUB_REPO}:${env.BRANCH_NAME}
+            echo "\$DOCKERHUB_PASS" | ${DOCKER_CMD} login -u "\$DOCKERHUB_USER" --password-stdin
+            ${DOCKER_CMD} push ${DOCKERHUB_REPO}:${env.BRANCH_NAME}
           """
         }
       }
@@ -45,12 +44,11 @@ pipeline {
     stage('Deploy to Kubernetes') {
       steps {
         script {
-          // namespace = branch sauf si master → prod
           def ns = (env.BRANCH_NAME == 'master') ? 'prod' : env.BRANCH_NAME
           sh """
             kubectl config use-context ${KUBE_CONTEXT}
-            helm upgrade --install examen-app charts/examen \
-              --namespace ${ns} \
+            ${HELM_CMD} upgrade --install examen-app charts/examen \\
+              --namespace ${ns} \\
               --set image.tag=${env.BRANCH_NAME}
           """
         }
@@ -59,12 +57,8 @@ pipeline {
   }
 
   post {
-    success {
-      echo "✅ Pipeline OK pour la branche ${env.BRANCH_NAME}"
-    }
-    failure {
-      echo "❌ Pipeline échoué pour la branche ${env.BRANCH_NAME}"
-    }
+    success { echo "✅ Pipeline OK pour ${env.BRANCH_NAME}" }
+    failure { echo "❌ Pipeline échoué pour ${env.BRANCH_NAME}" }
   }
 }
 
