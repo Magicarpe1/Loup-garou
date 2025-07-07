@@ -40,12 +40,13 @@ pipeline {
         script {
           // Choisit le namespace selon la branche
           def ns = (env.BRANCH_NAME == 'master') ? 'prod' : env.BRANCH_NAME
-          // Change le contexte Kubernetes
-          sh "kubectl config use-context ${KUBE_CONTEXT}"
-          // Déploie ou met à jour avec Helm en une seule ligne
-          sh "kubectl config use-context ${KUBE_CONTEXT} && " +
-             "helm upgrade --install examen-app charts/examen --namespace ${ns} --set 
-image.tag=${env.BRANCH_NAME}"
+          // Exécute en plusieurs lignes grâce aux triple guillemets
+          sh """
+            kubectl config use-context ${KUBE_CONTEXT}
+            helm upgrade --install examen-app charts/examen \
+              --namespace ${ns} \
+              --set image.tag=${env.BRANCH_NAME}
+          """
         }
       }
     }
@@ -60,3 +61,4 @@ image.tag=${env.BRANCH_NAME}"
     }
   }
 }
+
