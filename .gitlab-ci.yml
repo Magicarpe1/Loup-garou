@@ -1,0 +1,71 @@
+image: docker:stable
+services:
+  - docker:dind
+
+stages:
+  - build
+  - push
+  - deploy_dev
+  - deploy_qa
+  - deploy_staging
+  - deploy_prod
+
+variables:
+  IMAGE_NAME: magicarpe1/examen-app
+  DOCKER_DRIVER: overlay2
+
+before_script:
+  - docker login -u "$DOCKERHUB_USERNAME" -p 
+"$DOCKERHUB_PASSWORD"
+
+build:
+  stage: build
+  script:
+    - docker build -t $IMAGE_NAME:$CI_COMMIT_REF_NAME .
+  only:
+    - branches
+
+push:
+  stage: push
+  script:
+    - docker push $IMAGE_NAME:$CI_COMMIT_REF_NAME
+  only:
+    - branches
+
+deploy_dev:
+  stage: deploy_dev
+  script:
+    - helm upgrade --install examen-app ./charts/examen 
+--namespace dev --create-namespace --set 
+image.repository=$IMAGE_NAME --set image.tag=$CI_COMMIT_REF_NAME
+  only:
+    - branches
+
+deploy_qa:
+  stage: deploy_qa
+  script:
+    - helm upgrade --install examen-app ./charts/examen 
+--namespace qa --create-namespace --set 
+image.repository=$IMAGE_NAME --set image.tag=$CI_COMMIT_REF_NAME
+  only:
+    - branches
+
+deploy_staging:
+  stage: deploy_staging
+  script:
+    - helm upgrade --install examen-app ./charts/examen 
+--namespace staging --create-namespace --set 
+image.repository=$IMAGE_NAME --set image.tag=$CI_COMMIT_REF_NAME
+  only:
+    - branches
+
+deploy_prod:
+  stage: deploy_prod
+  script:
+    - helm upgrade --install examen-app ./charts/examen 
+--namespace prod --create-namespace --set 
+image.repository=$IMAGE_NAME --set image.tag=$CI_COMMIT_REF_NAME
+  when: manual
+  only:
+    - main
+
